@@ -5,6 +5,7 @@ import User from '../src/app/models/User';
 
 factory.define('User', User, {
   name: faker.name.findName(),
+  username: faker.name.findName(),
   email: faker.internet.email(),
   password: faker.internet.password(),
 });
