@@ -1,5 +1,9 @@
 import Sequelize, { Model } from 'sequelize';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
+
+import authConfig from '../../config/auth';
 
 class User extends Model {
   static init(sequelize) {
@@ -20,6 +24,14 @@ class User extends Model {
     });
 
     return this;
+  }
+  checkPassword(password) {
+    return bcrypt.compare(password, this.password_hash);
+  }
+  static signToken(payload) {
+    return promisify(jwt.sign)(payload, authConfig.secret, {
+      expiresIn: authConfig.expiresIn,
+    });
   }
 }
 

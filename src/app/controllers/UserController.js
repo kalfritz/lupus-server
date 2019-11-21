@@ -12,7 +12,10 @@ class UserController {
 
     const { id, username, name } = await User.create(req.body);
 
-    return res.json({ id, username, name, email });
+    return res.json({
+      user: { id, username, name, email },
+      token: await User.signToken({ id }),
+    });
   }
 }
 

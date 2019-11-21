@@ -12,6 +12,7 @@ module.exports = {
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
   storage: './__tests__/database.sqlite',
+  logging: false,
   define: {
     timestamps: true,
     underscored: true,

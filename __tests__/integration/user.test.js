@@ -1,5 +1,7 @@
 import request from 'supertest';
+import { promisify } from 'util';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import app from '../../src/app';
 
 import factory from '../factories';
@@ -17,7 +19,7 @@ describe('User', () => {
       .post('/users')
       .send(user);
 
-    expect(response.body).toHaveProperty('id');
+    expect(response.body.user).toHaveProperty('id');
   });
   it('should not be able to store duplicated email', async () => {
     const user = await factory.attrs('User');
@@ -40,5 +42,19 @@ describe('User', () => {
     const compareHash = await bcrypt.compare('123456', user.password_hash);
 
     expect(compareHash).toBe(true);
+  });
+  it('should return jwt when registering', async () => {
+    const user = await factory.attrs('User');
+
+    const response = await request(app)
+      .post('/users')
+      .send(user);
+
+    const decoded = await promisify(jwt.verify)(
+      response.body.token,
+      process.env.APP_SECRET
+    );
+
+    expect(decoded.id).toBe(response.body.user.id);
   });
 });
