@@ -25,9 +25,7 @@ class User extends Model {
 
     return this;
   }
-  checkPassword(password) {
-    return bcrypt.compare(password, this.password_hash);
-  }
+
   static associate(models) {
     this.hasMany(models.Post, {
       foreignKey: 'user_id',
@@ -52,6 +50,9 @@ class User extends Model {
     return promisify(jwt.sign)(payload, authConfig.secret, {
       expiresIn: authConfig.expiresIn,
     });
+  }
+  checkPassword(password) {
+    return bcrypt.compare(password, this.password_hash);
   }
 }
 

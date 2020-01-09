@@ -13,6 +13,7 @@ import CommentLikeController from './app/controllers/CommentLikeController';
 
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
+routes.put('/users', authMiddleware, UserController.update);
 
 routes.get('/posts', authMiddleware, PostController.index);
 routes.post('/posts', authMiddleware, PostController.store);
