@@ -9,6 +9,7 @@ import SessionController from './app/controllers/SessionController';
 import PostController from './app/controllers/PostController';
 import CommentController from './app/controllers/CommentController';
 import PostLikeController from './app/controllers/PostLikeController';
+import CommentLikeController from './app/controllers/CommentLikeController';
 
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
@@ -25,5 +26,16 @@ routes.post(
 
 routes.get('/posts/:post_id/likes', authMiddleware, PostLikeController.index);
 routes.post('/posts/:post_id/likes', authMiddleware, PostLikeController.store);
+
+routes.get(
+  '/posts/:post_id/comments/:comment_id/likes',
+  authMiddleware,
+  CommentLikeController.index
+);
+routes.post(
+  '/posts/:post_id/comments/:comment_id/likes',
+  authMiddleware,
+  CommentLikeController.store
+);
 
 export default routes;
