@@ -6,7 +6,7 @@ class Comment extends Model {
       {
         content: Sequelize.STRING,
       },
-      { sequelize }
+      { sequelize, paranoid: true }
     );
 
     return this;

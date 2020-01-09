@@ -28,6 +28,13 @@ class User extends Model {
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }
+  static associate(models) {
+    this.belongsToMany(models.Post, {
+      foreignKey: 'user_id',
+      through: 'post_likes',
+      as: 'likedPosts',
+    });
+  }
   static signToken(payload) {
     return promisify(jwt.sign)(payload, authConfig.secret, {
       expiresIn: authConfig.expiresIn,

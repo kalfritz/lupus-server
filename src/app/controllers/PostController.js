@@ -5,7 +5,6 @@ class PostController {
   async store(req, res) {
     const { content } = req.body;
     const { userId } = req;
-    console.log(userId);
 
     const post = await Post.create({
       user_id: userId,

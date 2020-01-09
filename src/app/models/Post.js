@@ -6,7 +6,7 @@ class Post extends Model {
       {
         content: Sequelize.STRING,
       },
-      { sequelize }
+      { sequelize, paranoid: true }
     );
 
     return this;
@@ -14,6 +14,11 @@ class Post extends Model {
 
   static associate(models) {
     this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    this.belongsToMany(models.User, {
+      foreignKey: 'post_id',
+      through: 'post_likes',
+      as: 'likes',
+    });
   }
 }
 
