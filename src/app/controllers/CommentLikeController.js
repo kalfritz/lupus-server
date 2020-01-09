@@ -42,7 +42,11 @@ class PostLikeController {
       throw new Error('Post does not exist');
     }
 
-    const comment = await Post.findByPk(comment_id);
+    const comment = await Comment.findByPk(comment_id);
+
+    if (!comment) {
+      throw new Error('Comment does not exist');
+    }
 
     const likes = await comment.getLikes({
       attributes: ['id', 'name', 'username'],
