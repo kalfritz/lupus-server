@@ -29,10 +29,23 @@ class User extends Model {
     return bcrypt.compare(password, this.password_hash);
   }
   static associate(models) {
+    this.hasMany(models.Post, {
+      foreignKey: 'user_id',
+      as: 'posts',
+    });
+    this.hasMany(models.Comment, {
+      foreignKey: 'user_id',
+      as: 'comments',
+    });
     this.belongsToMany(models.Post, {
       foreignKey: 'user_id',
       through: 'post_likes',
       as: 'likedPosts',
+    });
+    this.belongsToMany(models.Comment, {
+      foreignKey: 'user_id',
+      through: 'comment_likes',
+      as: 'likedComments',
     });
   }
   static signToken(payload) {
