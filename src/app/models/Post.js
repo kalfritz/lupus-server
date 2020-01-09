@@ -19,6 +19,10 @@ class Post extends Model {
       through: 'post_likes',
       as: 'likes',
     });
+    this.hasMany(models.Comment, {
+      foreignKey: 'post_id',
+      as: 'comments',
+    });
   }
 }
 
