@@ -21,7 +21,6 @@ describe('User', () => {
 
     expect(response.body.user).toHaveProperty('id');
   });
-
   it('should not be able to store duplicated username', async () => {
     await factory.create('User', {
       username: 'this is my username',
@@ -58,7 +57,6 @@ describe('User', () => {
 
     expect(response.status).toBe(400);
   });
-
   it('should encrypt password when new user is created', async () => {
     const user = await factory.create('User', {
       password: '123456',
@@ -82,58 +80,4 @@ describe('User', () => {
 
     expect(decoded.id).toBe(response.body.user.id);
   });
-  it('should be able to login', async () => {
-    const user = await factory.attrs('User');
-
-    const signedUpUser = await request(app)
-      .post('/users')
-      .send(user);
-
-    const response = await request(app)
-      .post('/sessions')
-      .send(user);
-
-    expect(response.body.user.id).toBe(signedUpUser.body.user.id);
-  });
-  it('should return jwt when logging in', async () => {
-    const user = await factory.attrs('User');
-
-    await request(app)
-      .post('/users')
-      .send(user);
-
-    const response = await request(app)
-      .post('/sessions')
-      .send(user);
-
-    expect(response.body).toHaveProperty('token');
-  });
-  it('should return 401 error if there is no user with given email', async () => {
-    const user = await factory.attrs('User');
-
-    const response = await request(app)
-      .post('/sessions')
-      .send(user);
-
-    expect(response.status).toBe(401);
-  });
-
-  it('should return 401 error if password do not match given a related email', async () => {
-    await factory.create('User', {
-      email: 'teste@gmail.com',
-      password: '123456',
-    });
-
-    const user = await factory.attrs('User', {
-      email: 'teste@gmail.com',
-      password: 'this is a wrong password',
-    });
-
-    const response = await request(app)
-      .post('/sessions')
-      .send(user);
-
-    expect(response.status).toBe(401);
-  });
-  it('should return the profile picture link when logging in', async () => {});
 });
