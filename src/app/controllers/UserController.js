@@ -1,5 +1,5 @@
 import User from '../models/User';
-//import File from '../models/File';
+import File from '../models/File';
 
 class UserController {
   async store(req, res) {
@@ -79,6 +79,21 @@ class UserController {
     const deletedUser = await user.destroy();
 
     return res.json(deletedUser);
+  }
+  async show(req, res) {
+    const { user_id } = req.params;
+
+    const user = await User.findByPk(user_id, {
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
+
+    return res.json(user);
   }
 }
 
