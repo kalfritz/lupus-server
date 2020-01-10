@@ -25,6 +25,11 @@ routes.post(
   authMiddleware,
   CommentController.store
 );
+routes.put(
+  '/posts/:post_id/comments/:comment_id',
+  authMiddleware,
+  CommentController.update
+);
 
 routes.get('/posts/:post_id/likes', authMiddleware, PostLikeController.index);
 routes.post('/posts/:post_id/likes', authMiddleware, PostLikeController.store);

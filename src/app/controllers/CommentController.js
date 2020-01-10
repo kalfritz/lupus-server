@@ -1,5 +1,3 @@
-/*import User from '../models/User';
-import Post from '../models/Post';*/
 import Comment from '../models/Comment';
 
 class CommentController {
@@ -19,6 +17,26 @@ class CommentController {
     const comments = await Comment.findAll();
 
     res.json(comments);
+  }
+  async update(req, res) {
+    const { userId } = req;
+    const { comment_id } = req.params;
+
+    const comment = await Comment.findByPk(comment_id);
+
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    if (comment.user_id !== userId) {
+      throw new Error('You do not have permission to edit this comment');
+    }
+
+    const updatedComment = await comment.update(req.body, {
+      new: true,
+    });
+
+    return res.json(updatedComment);
   }
 }
 
