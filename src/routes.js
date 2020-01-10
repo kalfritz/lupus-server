@@ -17,6 +17,7 @@ routes.put('/users', authMiddleware, UserController.update);
 
 routes.get('/posts', authMiddleware, PostController.index);
 routes.post('/posts', authMiddleware, PostController.store);
+routes.put('/posts/:post_id', authMiddleware, PostController.update);
 
 routes.get('/posts/:post_id/comments', authMiddleware, CommentController.index);
 routes.post(
