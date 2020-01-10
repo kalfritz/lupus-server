@@ -63,6 +63,23 @@ class UserController {
 
     return res.json({ id, name, email, username /*, avatar */ });
   }
+  async delete(req, res) {
+    const { userId } = req;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    if (user.id !== userId) {
+      throw new Error('You do not have permission');
+    }
+
+    const deletedUser = await user.destroy();
+
+    return res.json(deletedUser);
+  }
 }
 
 export default new UserController();

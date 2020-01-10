@@ -38,6 +38,24 @@ class CommentController {
 
     return res.json(updatedComment);
   }
+  async delete(req, res) {
+    const { userId } = req;
+    const { comment_id } = req.params;
+
+    const comment = await Comment.findByPk(comment_id);
+
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    if (comment.user_id !== userId) {
+      throw new Error('You do not have permission to delete this comment');
+    }
+
+    const deletedComment = await comment.destroy();
+
+    return res.json(deletedComment);
+  }
 }
 
 export default new CommentController();

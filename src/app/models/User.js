@@ -15,7 +15,18 @@ class User extends Model {
         password: Sequelize.VIRTUAL,
         password_hash: Sequelize.STRING,
       },
-      { sequelize }
+      {
+        sequelize,
+        paranoid: true,
+        defaultScope: {
+          attributes: { exclude: ['password_hash'] },
+        },
+        scopes: {
+          withPassword: {
+            attributes: {},
+          },
+        },
+      }
     );
     this.addHook('beforeSave', async user => {
       if (user.password) {

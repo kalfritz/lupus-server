@@ -14,10 +14,12 @@ import CommentLikeController from './app/controllers/CommentLikeController';
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 routes.put('/users', authMiddleware, UserController.update);
+routes.delete('/users', authMiddleware, UserController.delete);
 
 routes.get('/posts', authMiddleware, PostController.index);
 routes.post('/posts', authMiddleware, PostController.store);
 routes.put('/posts/:post_id', authMiddleware, PostController.update);
+routes.delete('/posts/:post_id', authMiddleware, PostController.delete);
 
 routes.get('/posts/:post_id/comments', authMiddleware, CommentController.index);
 routes.post(
@@ -29,6 +31,11 @@ routes.put(
   '/posts/:post_id/comments/:comment_id',
   authMiddleware,
   CommentController.update
+);
+routes.delete(
+  '/posts/:post_id/comments/:comment_id',
+  authMiddleware,
+  CommentController.delete
 );
 
 routes.get('/posts/:post_id/likes', authMiddleware, PostLikeController.index);
