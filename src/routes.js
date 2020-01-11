@@ -10,6 +10,7 @@ import PostController from './app/controllers/PostController';
 import CommentController from './app/controllers/CommentController';
 import PostLikeController from './app/controllers/PostLikeController';
 import CommentLikeController from './app/controllers/CommentLikeController';
+import FriendshipController from './app/controllers/FriendshipController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -29,6 +30,12 @@ routes.get('/posts', authMiddleware, PostController.index);
 routes.post('/posts', authMiddleware, PostController.store);
 routes.put('/posts/:post_id', authMiddleware, PostController.update);
 routes.delete('/posts/:post_id', authMiddleware, PostController.delete);
+
+routes.post(
+  '/relationships/:person_id',
+  authMiddleware,
+  FriendshipController.store
+);
 
 routes.get('/posts/:post_id/comments', authMiddleware, CommentController.index);
 routes.post(

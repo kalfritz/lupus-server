@@ -57,6 +57,16 @@ class User extends Model {
       through: 'comment_likes',
       as: 'likedComments',
     });
+    this.belongsToMany(models.User, {
+      foreignKey: 'user_first_id',
+      through: 'user_relationship',
+      as: 'user1',
+    });
+    this.belongsToMany(models.User, {
+      foreignKey: 'user_second_id',
+      through: 'user_relationship',
+      as: 'user2',
+    });
   }
   static signToken(payload) {
     return promisify(jwt.sign)(payload, authConfig.secret, {
