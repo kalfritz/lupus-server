@@ -1,10 +1,65 @@
 import User from '../models/User';
 import UserRelationship from '../models/UserRelationship';
+import { Op } from 'sequelize';
 
 class FriendshipController {
+  async index(req, res) {
+    const { userId: user_id } = req;
+
+    //query all the friendships that the friend id is on user_first_id
+    const friendships = await UserRelationship.findAll({
+      where: {
+        status: 'friends',
+        [Op.or]: [
+          {
+            user_first_id: user_id,
+          },
+          {
+            user_second_id: user_id,
+          },
+        ],
+      },
+    });
+
+    return res.json(friendships);
+  }
+  async show(req, res) {
+    const { userId } = req;
+    const { user_id, friend_id } = req.params;
+
+    if (Number(userId) !== Number(user_id)) {
+      throw new Error('You do not have permission');
+    }
+
+    if (userId === person_id) {
+      throw new Error('You cannot be your own friend.');
+    }
+
+    const friendship = await UserRelationship.findOne({
+      where: {
+        status: 'friends',
+        [Op.or]: [
+          {
+            user_first_id: user_id,
+            user_second_id: friend_id,
+          },
+          {
+            user_second_id: friend_id,
+            user_first_id: user_id,
+          },
+        ],
+      },
+    });
+
+    return res.json(friendship);
+  }
   async store(req, res) {
     const { userId } = req;
     const { person_id } = req.params;
+
+    if (userId === person_id) {
+      throw new Error('You cannot be your own friend.');
+    }
 
     let user_first_id = 0;
     let user_second_id = 0;
@@ -92,6 +147,43 @@ class FriendshipController {
         }
       }
     }
+  }
+  async delete(req, res) {
+    const { userId } = req;
+    const { person_id } = req.params;
+
+    let user_first_id = 0;
+    let user_second_id = 0;
+    let defaultStatus = '';
+
+    if (userId < person_id) {
+      user_first_id = Number(userId);
+      user_second_id = Number(person_id);
+    } else {
+      user_first_id = Number(person_id);
+      user_second_id = Number(userId);
+    }
+
+    const person = await User.findByPk(person_id);
+
+    if (!person) {
+      throw new Error('Sorry. This user does not exist');
+    }
+
+    const relationship = await UserRelationship.findOne({
+      where: {
+        user_first_id,
+        user_second_id,
+      },
+    });
+
+    if (!relationship) {
+      throw new Error('You are not friends');
+    }
+
+    const deletedRelationship = await relationship.destroy();
+
+    return res.json(deletedRelationship);
   }
 }
 

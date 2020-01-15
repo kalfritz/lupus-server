@@ -1,5 +1,5 @@
-import User from '../models/User';
 import Post from '../models/Post';
+import { Op } from 'sequelize';
 
 class PostController {
   async store(req, res) {
@@ -14,7 +14,15 @@ class PostController {
     return res.json(post);
   }
   async index(req, res) {
-    const posts = await Post.findAll();
+    const { friendsIds } = req;
+
+    const posts = await Post.findAll({
+      where: {
+        user_id: {
+          [Op.in]: friendsIds,
+        },
+      },
+    });
 
     res.json(posts);
   }

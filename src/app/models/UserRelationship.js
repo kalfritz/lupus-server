@@ -15,8 +15,9 @@ class UserRelationship extends Model {
           'block_both'
         ),
         friendship_time: Sequelize.DATE,
+        
       },
-      { sequelize, paranoid: true }
+      { sequelize}
     );
 
     return this;
