@@ -42,6 +42,18 @@ class PostController {
             },
           ],
         },
+        {
+          model: User,
+          as: 'likes',
+          attributes: ['id', 'name', 'username', 'email'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'url', 'path'],
+            },
+          ],
+        },
       ],
     });
 

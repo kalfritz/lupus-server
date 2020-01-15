@@ -1,6 +1,7 @@
 import Comment from '../models/Comment';
 import User from '../models/User';
 import File from '../models/File';
+import sequelize from 'sequelize';
 
 class CommentController {
   async store(req, res) {
@@ -31,6 +32,18 @@ class CommentController {
               model: File,
               as: 'avatar',
               attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: 'likes',
+          attributes: ['id', 'name', 'username', 'email'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'url', 'path'],
             },
           ],
         },
