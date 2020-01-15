@@ -1,4 +1,6 @@
 import Post from '../models/Post';
+import File from '../models/File';
+import User from '../models/User';
 import { Op } from 'sequelize';
 
 class PostController {
@@ -22,6 +24,25 @@ class PostController {
           [Op.in]: friendsIds,
         },
       },
+      include: [
+        {
+          model: File,
+          as: 'picture',
+          attributes: ['id', 'path', 'url'],
+        },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'username'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+      ],
     });
 
     res.json(posts);
