@@ -24,7 +24,6 @@ class BlockController {
 
     let blocksIds = [];
 
-    console.log('a');
     if (blocks_first.length > 0) {
       blocks_first.forEach(relationship =>
         blocksIds.push(Number(relationship.user_second_id))

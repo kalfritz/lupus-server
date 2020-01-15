@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 class FriendController {
   async index(req, res) {
     const { user_id } = req.params;
+    const { friendsIds: visitorFriendsIds } = req;
 
     const [friendships_first, friendships_second] = await Promise.all([
       UserRelationship.findAll({
@@ -34,6 +35,7 @@ class FriendController {
         friendsIds.push(Number(friendship.user_second_id))
       );
     }
+
     const friends = await User.findAll({
       where: {
         id: {
@@ -47,7 +49,20 @@ class FriendController {
       },
     });
 
-    return res.json(friends);
+    let mutualFriends = [];
+    if (visitorFriendsIds) {
+      mutualFriends = friends.filter(friend => {
+        return visitorFriendsIds.includes(friend.id) ? true : false;
+      });
+    }
+    const friendsAndMutual = friends.map(friend => {
+      friend.dataValues.mutualFriend = visitorFriendsIds.includes(friend.id)
+        ? true
+        : false;
+      return friend;
+    });
+
+    return res.json(friendsAndMutual);
   }
 }
 

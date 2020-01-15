@@ -53,7 +53,12 @@ routes.delete(
   FriendshipController.delete
 );
 
-routes.get('/friends/:user_id', authMiddleware, FriendController.index);
+routes.get(
+  '/friends/:user_id',
+  authMiddleware,
+  friendsMiddleware,
+  FriendController.index
+);
 
 routes.get(
   '/sentfriendrequests',
