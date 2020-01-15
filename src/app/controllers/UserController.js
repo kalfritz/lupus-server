@@ -30,7 +30,7 @@ class UserController {
 
     const user = await User.findByPk(userId);
 
-    if (email !== user.email) {
+    if (email && email !== user.email) {
       const userExists = await User.findOne({
         where: {
           email,
@@ -53,13 +53,16 @@ class UserController {
 
     await user.update(req.body);
 
-    const { id, name, username, avatar } = await User.findByPk(userId, {
-      include: [
-        { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
-      ],
-    });
+    const { id, name, username, avatar, location, bio } = await User.findByPk(
+      userId,
+      {
+        include: [
+          { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+        ],
+      }
+    );
 
-    return res.json({ id, name, email, username, avatar });
+    return res.json({ id, name, email, username, avatar, location, bio });
   }
   async delete(req, res) {
     const { userId } = req;
