@@ -49,7 +49,6 @@ class FriendController {
       },
     });
 
-    let mutualFriends = [];
     if (visitorFriendsIds) {
       mutualFriends = friends.filter(friend => {
         return visitorFriendsIds.includes(friend.id) ? true : false;

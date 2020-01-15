@@ -18,6 +18,7 @@ import BlockController from './app/controllers/BlockController';
 
 import authMiddleware from './app/middlewares/auth';
 import friendsMiddleware from './app/middlewares/friends';
+import blocksMiddleware from './app/middlewares/blocks';
 
 const routes = new Router();
 const upload = multer(multerConfig);
@@ -71,7 +72,12 @@ routes.get(
   ReceivedFriendRequestController.index
 );
 
-routes.get('/blockedusers', authMiddleware, BlockController.index);
+routes.get(
+  '/blockedusers',
+  authMiddleware,
+  blocksMiddleware,
+  BlockController.index
+);
 routes.post('/blockedusers/:person_id', authMiddleware, BlockController.store);
 
 routes.get('/posts/:post_id/comments', authMiddleware, CommentController.index);
