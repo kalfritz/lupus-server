@@ -1,7 +1,7 @@
 import Comment from '../models/Comment';
 import User from '../models/User';
 import File from '../models/File';
-import sequelize from 'sequelize';
+import { Op } from 'sequelize';
 
 class CommentController {
   async store(req, res) {
@@ -17,10 +17,14 @@ class CommentController {
     return res.json(comment);
   }
   async index(req, res) {
+    const { blocksIds } = req;
     const { post_id } = req.params;
     const comments = await Comment.findAll({
       where: {
         post_id,
+        user_id: {
+          [Op.notIn]: blocksIds,
+        },
       },
       include: [
         {
@@ -39,6 +43,7 @@ class CommentController {
           model: User,
           as: 'likes',
           attributes: ['id', 'name', 'username', 'email'],
+
           include: [
             {
               model: File,

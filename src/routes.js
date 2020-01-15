@@ -32,7 +32,13 @@ routes.post('/sessions', SessionController.store);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-routes.get('/posts', authMiddleware, friendsMiddleware, PostController.index);
+routes.get(
+  '/posts',
+  authMiddleware,
+  friendsMiddleware,
+  blocksMiddleware,
+  PostController.index
+);
 routes.post('/posts', authMiddleware, PostController.store);
 routes.put('/posts/:post_id', authMiddleware, PostController.update);
 routes.delete('/posts/:post_id', authMiddleware, PostController.delete);
@@ -80,7 +86,12 @@ routes.get(
 );
 routes.post('/blockedusers/:person_id', authMiddleware, BlockController.store);
 
-routes.get('/posts/:post_id/comments', authMiddleware, CommentController.index);
+routes.get(
+  '/posts/:post_id/comments',
+  authMiddleware,
+  blocksMiddleware,
+  CommentController.index
+);
 routes.post(
   '/posts/:post_id/comments',
   authMiddleware,

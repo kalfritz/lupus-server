@@ -16,12 +16,13 @@ class PostController {
     return res.json(post);
   }
   async index(req, res) {
-    const { friendsIds } = req;
+    const { friendsIds, blocksIds } = req;
 
     const posts = await Post.findAll({
       where: {
         user_id: {
           [Op.in]: friendsIds,
+          [Op.notIn]: blocksIds,
         },
       },
       include: [
