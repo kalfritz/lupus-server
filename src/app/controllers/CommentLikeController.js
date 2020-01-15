@@ -1,6 +1,7 @@
 import Post from '../models/Post';
 import Comment from '../models/Comment';
 import User from '../models/User';
+import File from '../models/File';
 
 class PostLikeController {
   async store(req, res) {
@@ -50,6 +51,13 @@ class PostLikeController {
 
     const likes = await comment.getLikes({
       attributes: ['id', 'name', 'username'],
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
     });
 
     return res.json(likes);

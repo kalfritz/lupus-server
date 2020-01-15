@@ -1,4 +1,6 @@
 import Comment from '../models/Comment';
+import User from '../models/User';
+import File from '../models/File';
 
 class CommentController {
   async store(req, res) {
@@ -14,7 +16,26 @@ class CommentController {
     return res.json(comment);
   }
   async index(req, res) {
-    const comments = await Comment.findAll();
+    const { post_id } = req.params;
+    const comments = await Comment.findAll({
+      where: {
+        post_id,
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'username'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+      ],
+    });
 
     res.json(comments);
   }
