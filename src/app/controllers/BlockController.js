@@ -1,41 +1,56 @@
 import User from '../models/User';
+import File from '../models/File';
 import UserRelationship from '../models/UserRelationship';
 import { Op } from 'sequelize';
 
 class BlockController {
   async index(req, res) {
     const { userId: user_id } = req;
-    const blockedUsers = await UserRelationship.findAll({
+
+    const [blocks_first, blocks_second] = await Promise.all([
+      UserRelationship.findAll({
+        where: {
+          [Op.or]: [{ status: 'block_first_second' }, { status: 'block_both' }],
+          user_first_id: user_id,
+        },
+      }),
+      UserRelationship.findAll({
+        where: {
+          status: 'block_second_first',
+          user_second_id: user_id,
+        },
+      }),
+    ]);
+
+    let blocksIds = [];
+
+    console.log('a');
+    if (blocks_first.length > 0) {
+      blocks_first.forEach(relationship =>
+        blocksIds.push(Number(relationship.user_second_id))
+      );
+    }
+    if (blocks_second.length > 0) {
+      blocks_second.forEach(relationship =>
+        blocksIds.push(Number(relationship.user_first_id))
+      );
+    }
+    const blockedUsers = await User.findAll({
       where: {
-        [Op.or]: [
-          {
-            user_first_id: user_id,
-            [Op.or]: [
-              {
-                status: 'block_first_second',
-              },
-              {
-                status: 'block_both',
-              },
-            ],
-          },
-          {
-            user_second_id: user_id,
-            [Op.or]: [
-              {
-                status: 'block_second_first',
-              },
-              {
-                status: 'block_both',
-              },
-            ],
-          },
-        ],
+        id: {
+          [Op.in]: blocksIds,
+        },
+      },
+      include: {
+        model: File,
+        as: 'avatar',
+        attributes: ['id', 'path', 'url'],
       },
     });
 
     return res.json(blockedUsers);
   }
+
   async store(req, res) {
     const { userId } = req;
     const { person_id } = req.params;

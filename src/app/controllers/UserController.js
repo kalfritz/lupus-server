@@ -53,15 +53,13 @@ class UserController {
 
     await user.update(req.body);
 
-    const { id, name, username /*,avatar*/ } = await User.findByPk(
-      userId /*, {
+    const { id, name, username, avatar } = await User.findByPk(userId, {
       include: [
         { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
       ],
-    }*/
-    );
+    });
 
-    return res.json({ id, name, email, username /*, avatar */ });
+    return res.json({ id, name, email, username, avatar });
   }
   async delete(req, res) {
     const { userId } = req;
