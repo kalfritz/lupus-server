@@ -1,4 +1,5 @@
 import Post from '../models/Post';
+import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
 import { Op } from 'sequelize';
@@ -44,8 +45,38 @@ class PostController {
           ],
         },
         {
+          model: Comment,
+          as: 'comments',
+          attributes: ['id', 'user_id', 'content'],
+          limit: 3,
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'name', 'username', 'email'],
+              where: {
+                id: {
+                  [Op.notIn]: blocksIds,
+                },
+              },
+              include: [
+                {
+                  model: File,
+                  as: 'avatar',
+                  attributes: ['id', 'url', 'path'],
+                },
+              ],
+            },
+          ],
+        },
+        {
           model: User,
           as: 'likes',
+          where: {
+            id: {
+              [Op.notIn]: blocksIds,
+            },
+          },
           attributes: ['id', 'name', 'username', 'email'],
           include: [
             {
@@ -57,14 +88,8 @@ class PostController {
         },
       ],
     });
-    const postsWithoutLikesOfBlockedPeople = posts.map(post => {
-      post.dataValues.likes = post.dataValues.likes.filter(like => {
-        return blocksIds.includes(like.id) ? false : true;
-      });
 
-      return post;
-    });
-    return res.json(postsWithoutLikesOfBlockedPeople);
+    return res.json(posts);
   }
   async update(req, res) {
     const { userId } = req;

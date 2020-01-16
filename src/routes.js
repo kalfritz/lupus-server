@@ -33,7 +33,12 @@ routes.post('/sessions', SessionController.store);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-routes.get('/timeline/:person_id', TimelineController.index);
+routes.get(
+  '/timeline/:person_id',
+  authMiddleware,
+  blocksMiddleware,
+  TimelineController.index
+);
 
 routes.get(
   '/posts',
