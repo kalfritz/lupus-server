@@ -7,6 +7,7 @@ import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
 import PostController from './app/controllers/PostController';
+import TimelineController from './app/controllers/TimelineController';
 import CommentController from './app/controllers/CommentController';
 import PostLikeController from './app/controllers/PostLikeController';
 import CommentLikeController from './app/controllers/CommentLikeController';
@@ -31,6 +32,8 @@ routes.delete('/users', authMiddleware, UserController.delete);
 routes.post('/sessions', SessionController.store);
 
 routes.post('/files', upload.single('file'), FileController.store);
+
+routes.get('/timeline/:person_id', TimelineController.index);
 
 routes.get(
   '/posts',

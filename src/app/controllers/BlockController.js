@@ -31,6 +31,10 @@ class BlockController {
     let user_second_id = 0;
     let defaultStatus = '';
 
+    if (userId === person_id) {
+      throw new Error('You cannot block yourself');
+    }
+
     if (userId < person_id) {
       user_first_id = Number(userId);
       user_second_id = Number(person_id);
