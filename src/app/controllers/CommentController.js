@@ -64,13 +64,6 @@ class CommentController {
       ],
     });
 
-    const commentsWithoutLikesOfBlockedPeople = comments.map(comment => {
-      comment.dataValues.likes = comment.dataValues.likes.filter(like => {
-        return blocksIds.includes(like.id) ? false : true;
-      });
-
-      return comment;
-    });
     return res.json(comments);
   }
   async update(req, res) {
