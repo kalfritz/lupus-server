@@ -57,8 +57,14 @@ class PostController {
         },
       ],
     });
+    const postsWithoutLikesOfBlockedPeople = posts.map(post => {
+      post.dataValues.likes = post.dataValues.likes.filter(like => {
+        return blocksIds.includes(like.id) ? false : true;
+      });
 
-    res.json(posts);
+      return post;
+    });
+    return res.json(postsWithoutLikesOfBlockedPeople);
   }
   async update(req, res) {
     const { userId } = req;
