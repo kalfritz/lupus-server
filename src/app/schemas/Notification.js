@@ -6,9 +6,17 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    picture: {
+      type: String,
+      required: false,
+    },
     user: {
       type: Number,
       required: true,
+    },
+    user_avatar: {
+      type: String,
+      required: false,
     },
     read: {
       type: Boolean,

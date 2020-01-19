@@ -2,7 +2,7 @@ import Post from '../models/Post';
 import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
-import { Op } from 'sequelize';
+import sequelize, { Op } from 'sequelize';
 
 class PostController {
   async store(req, res) {
@@ -16,15 +16,13 @@ class PostController {
 
     return res.json(post);
   }
-  async index(req, res) {
-    const { friendsIds, blocksIds } = req;
+  async show(req, res) {
+    let { blocksIds } = req;
+    const { post_id } = req.params;
 
-    const posts = await Post.findAll({
+    const post = await Post.findOne({
       where: {
-        user_id: {
-          [Op.in]: friendsIds,
-          [Op.notIn]: blocksIds,
-        },
+        id: post_id,
       },
       include: [
         {
@@ -48,12 +46,33 @@ class PostController {
           model: Comment,
           as: 'comments',
           attributes: ['id', 'user_id', 'content'],
-          limit: 3,
+          order: [['created_at', 'ASC']],
+          required: false,
+          where: {
+            user_id: {
+              [Op.notIn]: blocksIds,
+            },
+          },
+          limit: 50,
           include: [
             {
               model: User,
               as: 'user',
               attributes: ['id', 'name', 'username', 'email'],
+              include: [
+                {
+                  model: File,
+                  as: 'avatar',
+                  attributes: ['id', 'url', 'path'],
+                },
+              ],
+            },
+            {
+              model: User,
+              as: 'likes',
+              order: [['created_at', 'DESC']],
+              attributes: ['id', 'name', 'username', 'email'],
+              required: false,
               where: {
                 id: {
                   [Op.notIn]: blocksIds,
@@ -72,6 +91,93 @@ class PostController {
         {
           model: User,
           as: 'likes',
+          order: [['created_at', 'DESC']],
+          attributes: ['id', 'name', 'username', 'email'],
+          required: false,
+          where: {
+            id: {
+              [Op.not]: blocksIds,
+            },
+          },
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'url', 'path'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (blocksIds.includes(post.user_id)) {
+      throw new Error('Post not found');
+    }
+
+    return res.json(post);
+  }
+  async index(req, res) {
+    const { friendsIds, blocksIds } = req;
+
+    const posts = await Post.findAll({
+      where: {
+        user_id: {
+          [Op.in]: friendsIds,
+          [Op.notIn]: blocksIds,
+        },
+      },
+      order: [['created_at', 'DESC']],
+      include: [
+        {
+          model: File,
+          as: 'picture',
+          attributes: ['id', 'path', 'url'],
+        },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'username'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+        {
+          model: Comment,
+          as: 'comments',
+          attributes: ['id', 'user_id', 'content'],
+          order: [['created_at', 'ASC']],
+          required: false,
+          where: {
+            user_id: {
+              [Op.notIn]: blocksIds,
+            },
+          },
+          limit: 3,
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['id', 'name', 'username', 'email'],
+
+              include: [
+                {
+                  model: File,
+                  as: 'avatar',
+                  attributes: ['id', 'url', 'path'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: 'likes',
+          order: [['created_at', 'DESC']],
+          required: false,
           where: {
             id: {
               [Op.notIn]: blocksIds,

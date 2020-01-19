@@ -1,5 +1,8 @@
 import User from '../models/User';
+import File from '../models/File';
 import UserRelationship from '../models/UserRelationship';
+
+import Notification from '../schemas/Notification';
 import { Op } from 'sequelize';
 
 class FriendshipController {
@@ -75,7 +78,15 @@ class FriendshipController {
       defaultStatus = 'pending_second_first';
     }
 
-    const person = await User.findByPk(person_id);
+    const person = await User.findByPk(person_id, {
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
 
     if (!person) {
       throw new Error('Sorry. This user does not exist');
@@ -102,6 +113,26 @@ class FriendshipController {
         if (relationship.status === 'pending_second_first') {
           relationship.status = 'friends';
           await relationship.save();
+
+          const user = await User.findByPk(userId, {
+            include: [
+              { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+            ],
+          });
+
+          await Promise.all([
+            Notification.create({
+              content: `You and ${person.name} are friends now`,
+              user: userId,
+              user_avatar: person.avatar ? person.avatar.url : null,
+            }),
+            Notification.create({
+              content: `You and ${user.name} are friends now`,
+              user: person_id,
+              user_avatar: user.avatar ? user.avatar.url : null,
+            }),
+          ]);
+
           return res.json(relationship);
         }
         if (relationship.status === 'friends') {
@@ -124,6 +155,26 @@ class FriendshipController {
         if (relationship.status === 'pending_first_second') {
           relationship.status = 'friends';
           await relationship.save();
+
+          const user = await User.findByPk(userId, {
+            include: [
+              { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+            ],
+          });
+
+          await Promise.all([
+            Notification.create({
+              content: `You and ${person.name} are friends now`,
+              user: userId,
+              user_avatar: person.avatar ? person.avatar.url : null,
+            }),
+            Notification.create({
+              content: `You and ${user.name} are friends now`,
+              user: person_id,
+              user_avatar: user.avatar ? user.avatar.url : null,
+            }),
+          ]);
+
           return res.json(relationship);
         }
         if (relationship.status === 'pending_second_first') {

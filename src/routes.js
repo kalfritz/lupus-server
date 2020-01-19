@@ -47,6 +47,12 @@ routes.get(
   blocksMiddleware,
   PostController.index
 );
+routes.get(
+  '/posts/:post_id',
+  authMiddleware,
+  blocksMiddleware,
+  PostController.show
+);
 routes.post('/posts', authMiddleware, PostController.store);
 routes.put('/posts/:post_id', authMiddleware, PostController.update);
 routes.delete('/posts/:post_id', authMiddleware, PostController.delete);

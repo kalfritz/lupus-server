@@ -12,3 +12,13 @@ module.exports = {
     },
   }),
 };
+
+/*attributes: {
+  include: [
+    [
+      sequelize.fn('COUNT', sequelize.col('comments.id')),
+      'commentsCount',
+    ],
+  ],
+},
+group: [sequelize.col('Post.id')],*/

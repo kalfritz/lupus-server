@@ -49,11 +49,6 @@ class FriendController {
       },
     });
 
-    if (visitorFriendsIds) {
-      mutualFriends = friends.filter(friend => {
-        return visitorFriendsIds.includes(friend.id) ? true : false;
-      });
-    }
     const friendsAndMutual = friends.map(friend => {
       friend.dataValues.mutualFriend = visitorFriendsIds.includes(friend.id)
         ? true

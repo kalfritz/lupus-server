@@ -1,6 +1,10 @@
 import Comment from '../models/Comment';
+import Post from '../models/Post';
 import User from '../models/User';
 import File from '../models/File';
+
+import Notification from '../schemas/Notification';
+
 import { Op } from 'sequelize';
 
 class CommentController {
@@ -14,6 +18,33 @@ class CommentController {
       post_id,
       content,
     });
+
+    const post = await Post.findOne({
+      where: {
+        id: post_id,
+      },
+      include: [
+        { model: File, as: 'picture', attributes: ['id', 'path', 'url'] },
+      ],
+    });
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
+    if (userId !== post.user_id) {
+      await Notification.create({
+        content: `${user.name} commented on your post ${post.content}`,
+        picture: post.picture ? post.picture.url : null,
+        user: post.user_id,
+        user_avatar: user.avatar ? user.avatar.url : null,
+      });
+    }
+
     return res.json(comment);
   }
   async index(req, res) {
@@ -26,6 +57,8 @@ class CommentController {
           [Op.notIn]: blocksIds,
         },
       },
+      order: [['created_at', 'ASC']],
+      limit: 50,
       include: [
         {
           model: User,

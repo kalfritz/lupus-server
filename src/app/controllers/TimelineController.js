@@ -40,6 +40,11 @@ class TimelineController {
         {
           model: Comment,
           as: 'comments',
+          where: {
+            user_id: { [Op.notIn]: blocksIds },
+          },
+          required: false,
+          order: ['created_at', 'ASC'],
           attributes: ['id', 'user_id', 'content'],
           limit: 3,
           include: [
@@ -70,6 +75,8 @@ class TimelineController {
               [Op.notIn]: blocksIds,
             },
           },
+          required: false,
+          order: ['created_at', 'DESC'],
           attributes: ['id', 'name', 'username', 'email'],
           include: [
             {
