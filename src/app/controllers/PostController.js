@@ -236,7 +236,7 @@ class PostController {
     return res.json(posts);
   }
   async update(req, res) {
-    const { userId } = req;
+    const { userId, friendsIds } = req;
     const { post_id } = req.params;
 
     const post = await Post.findByPk(post_id);
@@ -253,10 +253,12 @@ class PostController {
       new: true,
     });
 
+    await Cache.invalidateManyPosts([...friendsIds, userId]);
+
     return res.json(updatedPost);
   }
   async delete(req, res) {
-    const { userId } = req;
+    const { userId, friendsIds } = req;
     const { post_id } = req.params;
 
     const post = await Post.findByPk(post_id);
@@ -270,6 +272,8 @@ class PostController {
     }
 
     const deletedPost = await post.destroy();
+
+    await Cache.invalidateManyPosts([...friendsIds, userId]);
 
     return res.json(deletedPost);
   }

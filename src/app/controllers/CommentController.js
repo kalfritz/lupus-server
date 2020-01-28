@@ -147,6 +147,15 @@ class CommentController {
       new: true,
     });
 
+    const usersThatHaveThisPostCached = await Cache.get(
+      `post:${comment.post_id}`
+    );
+    usersThatHaveThisPostCached.length > 0 &&
+      (await Cache.invalidateManyPosts([
+        ...usersThatHaveThisPostCached,
+        userId,
+      ])); //remember to remove the userId
+
     return res.json(updatedComment);
   }
   async delete(req, res) {
@@ -164,6 +173,15 @@ class CommentController {
     }
 
     const deletedComment = await comment.destroy();
+
+    const usersThatHaveThisPostCached = await Cache.get(
+      `post:${comment.post_id}`
+    );
+    usersThatHaveThisPostCached.length > 0 &&
+      (await Cache.invalidateManyPosts([
+        ...usersThatHaveThisPostCached,
+        userId,
+      ])); //remember to remove the userId
 
     return res.json(deletedComment);
   }

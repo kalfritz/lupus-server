@@ -48,6 +48,13 @@ class CommentLikeController {
     if (isLiked) {
       await comment.removeLike(user);
 
+      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+      usersThatHaveThisPostCached.length > 0 &&
+        (await Cache.invalidateManyPosts([
+          ...usersThatHaveThisPostCached,
+          user_id,
+        ])); //remember to remove the userId
+
       return res.json({ msg: 'like removed sucessufully' });
     } else {
       await comment.addLike(user);

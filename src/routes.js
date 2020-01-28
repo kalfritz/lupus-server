@@ -57,8 +57,18 @@ routes.get(
   PostController.show
 );
 routes.post('/posts', authMiddleware, friendsMiddleware, PostController.store);
-routes.put('/posts/:post_id', authMiddleware, PostController.update);
-routes.delete('/posts/:post_id', authMiddleware, PostController.delete);
+routes.put(
+  '/posts/:post_id',
+  authMiddleware,
+  friendsMiddleware,
+  PostController.update
+);
+routes.delete(
+  '/posts/:post_id',
+  authMiddleware,
+  friendsMiddleware,
+  PostController.delete
+);
 
 routes.get('/friendships', authMiddleware, FriendshipController.index);
 routes.get(
