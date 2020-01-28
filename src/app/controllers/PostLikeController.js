@@ -4,9 +4,11 @@ import File from '../models/File';
 
 import Notification from '../schemas/Notification';
 
+import Cache from '../../lib/Cache';
+
 class PostLikeController {
   async store(req, res) {
-    const { userId: user_id } = req;
+    const { userId: user_id, friendsIds } = req;
     const { post_id } = req.params;
 
     const post = await Post.findByPk(post_id, {
@@ -59,6 +61,13 @@ class PostLikeController {
           },
         });
       }
+
+      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+      usersThatHaveThisPostCached.length > 0 &&
+        (await Cache.invalidateManyPosts([
+          ...usersThatHaveThisPostCached,
+          user_id,
+        ])); //remember to remove the userId
 
       return res.json({ added: true, removed: false });
     }

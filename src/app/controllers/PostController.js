@@ -122,12 +122,12 @@ class PostController {
   async index(req, res) {
     const { userId, friendsIds, blocksIds } = req;
     const { page = 1 } = req.query;
-    console.log(friendsIds);
+    console.log('fi:', friendsIds);
 
     const cacheKey = `user:${userId}:posts:${page}`;
     const cached = await Cache.get(cacheKey);
     if (cached) {
-      console.log(cached);
+      console.log('it will return cached');
       return res.json(cached);
     }
 
@@ -221,7 +221,17 @@ class PostController {
       ],
     });
 
-    await Cache.set(cacheKey, posts);
+    posts.forEach(async post => {
+      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+      usersThatHaveThisPostCached && usersThatHaveThisPostCached.length > 0
+        ? await Cache.set(`post:${post.id}`, [
+            ...usersThatHaveThisPostCached,
+            userId,
+          ])
+        : await Cache.set(`post:${post.id}`, [userId]);
+    });
+
+    await Cache.set(cacheKey, posts); //user cache
 
     return res.json(posts);
   }

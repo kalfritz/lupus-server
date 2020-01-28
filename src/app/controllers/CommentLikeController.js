@@ -5,10 +5,13 @@ import File from '../models/File';
 
 import Notification from '../schemas/Notification';
 
+import Cache from '../../lib/Cache';
+
 class CommentLikeController {
   async store(req, res) {
-    const { userId: user_id } = req;
+    const { userId: user_id, friendsIds } = req;
     const { post_id, comment_id } = req.params;
+    console.log('friends ids:', friendsIds);
 
     const post = await Post.findByPk(post_id, {
       include: [
@@ -68,6 +71,13 @@ class CommentLikeController {
           },
         });
       }
+
+      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+      usersThatHaveThisPostCached.length > 0 &&
+        (await Cache.invalidateManyPosts([
+          ...usersThatHaveThisPostCached,
+          user_id,
+        ])); //remember to remove the userId
 
       return res.json({ msg: 'like added sucessufully' });
     }

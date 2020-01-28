@@ -7,10 +7,12 @@ import Notification from '../schemas/Notification';
 
 import { Op } from 'sequelize';
 
+import Cache from '../../lib/Cache';
+
 class CommentController {
   async store(req, res) {
     const { content } = req.body;
-    const { userId } = req;
+    const { userId, friendsIds } = req;
     const { post_id } = req.params;
 
     const comment = await Comment.create({
@@ -54,6 +56,13 @@ class CommentController {
         },
       });
     }
+
+    const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+    usersThatHaveThisPostCached.length > 0 &&
+      (await Cache.invalidateManyPosts([
+        ...usersThatHaveThisPostCached,
+        userId,
+      ])); //remember to remove the userId
 
     return res.json(comment);
   }

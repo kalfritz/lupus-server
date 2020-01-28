@@ -112,6 +112,7 @@ routes.get(
 routes.post(
   '/posts/:post_id/comments',
   authMiddleware,
+  friendsMiddleware,
   CommentController.store
 );
 routes.put(
@@ -126,7 +127,12 @@ routes.delete(
 );
 
 routes.get('/posts/:post_id/likes', authMiddleware, PostLikeController.index);
-routes.post('/posts/:post_id/likes', authMiddleware, PostLikeController.store);
+routes.post(
+  '/posts/:post_id/likes',
+  authMiddleware,
+  friendsMiddleware,
+  PostLikeController.store
+);
 
 routes.get(
   '/posts/:post_id/comments/:comment_id/likes',
@@ -136,6 +142,7 @@ routes.get(
 routes.post(
   '/posts/:post_id/comments/:comment_id/likes',
   authMiddleware,
+  friendsMiddleware,
   CommentLikeController.store
 );
 
