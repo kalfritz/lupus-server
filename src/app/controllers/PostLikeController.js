@@ -38,20 +38,29 @@ class PostLikeController {
     if (isLiked) {
       await post.removeLike(user);
 
-      return res.json({ msg: 'like removed sucessufully' });
+      return res.json({ added: false, removed: true });
     } else {
       await post.addLike(user);
 
       if (user_id !== post.user_id) {
         await Notification.create({
-          content: `${user.name} liked your post ${post.content}`,
-          picture: post.picture ? post.picture.url : null,
-          user: post.user_id,
-          user_avatar: user.avatar ? user.avatar.url : null,
+          context: 'like_post',
+          recepient: post.user_id,
+          content: {
+            text: post.content,
+            post_id,
+            post_picture: post.picture ? post.picture.url : null,
+          },
+          dispatcher: {
+            id: user_id,
+            username: user.username,
+            name: user.name ? user.name : null,
+            avatar: user.avatar ? user.avatar.url : null,
+          },
         });
       }
 
-      return res.json({ msg: 'like added sucessufully' });
+      return res.json({ added: true, removed: false });
     }
   }
   async index(req, res) {

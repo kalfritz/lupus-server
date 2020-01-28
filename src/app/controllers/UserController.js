@@ -4,25 +4,28 @@ import File from '../models/File';
 class UserController {
   async store(req, res) {
     const { email, username } = req.body;
+    try {
+      console.log(req.body);
+      const checkUsername = await User.findOne({ where: { username } });
+      if (checkUsername) {
+        return res.status(400).json({ error: 'Duplicated username' });
+      }
 
-    const checkUsername = await User.findOne({ where: { username } });
+      const checkEmail = await User.findOne({ where: { email } });
 
-    if (checkUsername) {
-      return res.status(400).json({ error: 'Duplicated username' });
+      if (checkEmail) {
+        return res.status(400).json({ error: 'Duplicated email' });
+      }
+
+      const { id } = await User.create(req.body);
+
+      return res.json({
+        user: { id, username, email },
+        token: await User.signToken({ id }),
+      });
+    } catch (err) {
+      return console.log(err);
     }
-
-    const checkEmail = await User.findOne({ where: { email } });
-
-    if (checkEmail) {
-      return res.status(400).json({ error: 'Duplicated email' });
-    }
-
-    const { id, name } = await User.create(req.body);
-
-    return res.json({
-      user: { id, username, name, email },
-      token: await User.signToken({ id }),
-    });
   }
   async update(req, res) {
     const { userId } = req;

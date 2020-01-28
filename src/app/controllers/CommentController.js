@@ -38,10 +38,20 @@ class CommentController {
     });
     if (userId !== post.user_id) {
       await Notification.create({
-        content: `${user.name} commented on your post ${post.content}`,
-        picture: post.picture ? post.picture.url : null,
-        user: post.user_id,
-        user_avatar: user.avatar ? user.avatar.url : null,
+        context: 'comment_post',
+        recepient: post.user_id,
+        content: {
+          text: post.content,
+          post_id,
+          post_picture: post.picture ? post.picture.url : null,
+          comment_id: comment.id,
+        },
+        dispatcher: {
+          id: userId,
+          username: user.username,
+          name: user.name ? user.name : null,
+          avatar: user.avatar ? user.avatar.url : null,
+        },
       });
     }
 
@@ -50,6 +60,7 @@ class CommentController {
   async index(req, res) {
     const { blocksIds } = req;
     const { post_id } = req.params;
+
     const comments = await Comment.findAll({
       where: {
         post_id,
@@ -76,6 +87,7 @@ class CommentController {
           model: User,
           as: 'likes',
           attributes: ['id', 'name', 'username', 'email'],
+          order: [['created_at', 'ASC']],
           /*where: {
             /*I found that I dont need to do that as
             the where clause over there in the top already take care
@@ -96,7 +108,7 @@ class CommentController {
         },
       ],
     });
-
+    console.log(comments);
     return res.json(comments);
   }
   async update(req, res) {

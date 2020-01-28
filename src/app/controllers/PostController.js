@@ -3,16 +3,19 @@ import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
 import sequelize, { Op } from 'sequelize';
+import Cache from '../../lib/Cache';
 
 class PostController {
   async store(req, res) {
     const { content } = req.body;
-    const { userId } = req;
+    const { userId, friendsIds } = req;
 
     const post = await Post.create({
       user_id: userId,
       content,
     });
+
+    await Cache.invalidateManyPosts([...friendsIds, userId]); //remember to remove the userId
 
     return res.json(post);
   }
@@ -45,7 +48,7 @@ class PostController {
         {
           model: Comment,
           as: 'comments',
-          attributes: ['id', 'user_id', 'content'],
+          attributes: ['id', 'user_id', 'content', 'created_at', 'updated_at'],
           order: [['created_at', 'ASC']],
           required: false,
           where: {
@@ -117,16 +120,28 @@ class PostController {
     return res.json(post);
   }
   async index(req, res) {
-    const { friendsIds, blocksIds } = req;
+    const { userId, friendsIds, blocksIds } = req;
+    const { page = 1 } = req.query;
+    console.log(friendsIds);
 
+    const cacheKey = `user:${userId}:posts:${page}`;
+    const cached = await Cache.get(cacheKey);
+    if (cached) {
+      console.log(cached);
+      return res.json(cached);
+    }
+
+    console.log('querying..');
     const posts = await Post.findAll({
       where: {
         user_id: {
-          [Op.in]: friendsIds,
+          [Op.in]: [...friendsIds, userId], //Remember to remove the user id later.
           [Op.notIn]: blocksIds,
         },
       },
       order: [['created_at', 'DESC']],
+      limit: 20,
+      offset: (page - 1) * 20,
       include: [
         {
           model: File,
@@ -148,8 +163,15 @@ class PostController {
         {
           model: Comment,
           as: 'comments',
-          attributes: ['id', 'user_id', 'content'],
-          order: [['created_at', 'ASC']],
+          attributes: [
+            'id',
+            'user_id',
+            'post_id',
+            'content',
+            'created_at',
+            'updated_at',
+          ],
+          order: [['created_at', 'DESC']],
           required: false,
           where: {
             user_id: {
@@ -170,6 +192,10 @@ class PostController {
                   attributes: ['id', 'url', 'path'],
                 },
               ],
+            },
+            {
+              model: User,
+              as: 'likes',
             },
           ],
         },
@@ -194,6 +220,8 @@ class PostController {
         },
       ],
     });
+
+    await Cache.set(cacheKey, posts);
 
     return res.json(posts);
   }

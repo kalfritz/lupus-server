@@ -122,14 +122,24 @@ class FriendshipController {
 
           await Promise.all([
             Notification.create({
-              content: `You and ${person.name} are friends now`,
-              user: userId,
-              user_avatar: person.avatar ? person.avatar.url : null,
+              context: 'friendship',
+              recepient: userId,
+              dispatcher: {
+                id: person_id,
+                username: person.username,
+                name: person.name ? person.name : null,
+                avatar: person.avatar ? person.avatar.url : null,
+              },
             }),
             Notification.create({
-              content: `You and ${user.name} are friends now`,
-              user: person_id,
-              user_avatar: user.avatar ? user.avatar.url : null,
+              context: 'friendship',
+              recepient: person_id,
+              dispatcher: {
+                id: userId,
+                username: user.username,
+                name: user.name ? user.name : null,
+                avatar: user.avatar ? user.avatar.url : null,
+              },
             }),
           ]);
 
@@ -164,14 +174,24 @@ class FriendshipController {
 
           await Promise.all([
             Notification.create({
-              content: `You and ${person.name} are friends now`,
-              user: userId,
-              user_avatar: person.avatar ? person.avatar.url : null,
+              context: 'friendship',
+              recepient: userId,
+              dispatcher: {
+                id: person_id,
+                username: person.username,
+                name: person.name ? person.name : null,
+                avatar: person.avatar ? person.avatar.url : null,
+              },
             }),
             Notification.create({
-              content: `You and ${user.name} are friends now`,
-              user: person_id,
-              user_avatar: user.avatar ? user.avatar.url : null,
+              context: 'friendship',
+              recepient: person_id,
+              dispatcher: {
+                id: userId,
+                username: user.username,
+                name: user.name ? user.name : null,
+                avatar: user.avatar ? user.avatar.url : null,
+              },
             }),
           ]);
 

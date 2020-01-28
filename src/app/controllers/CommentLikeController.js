@@ -5,12 +5,20 @@ import File from '../models/File';
 
 import Notification from '../schemas/Notification';
 
-class PostLikeController {
+class CommentLikeController {
   async store(req, res) {
     const { userId: user_id } = req;
     const { post_id, comment_id } = req.params;
 
-    const post = await Post.findByPk(post_id);
+    const post = await Post.findByPk(post_id, {
+      include: [
+        {
+          model: File,
+          as: 'picture',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
 
     if (!post) {
       throw new Error('Post does not exist');
@@ -43,10 +51,21 @@ class PostLikeController {
 
       if (user_id !== comment.user_id) {
         await Notification.create({
-          content: `${user.name} liked your comment ${comment.content}`,
-          picture: comment.picture ? comment.picture.url : null, // it will results always in null as I have no picture in any comment for now
-          user: comment.user_id,
-          user_avatar: user.avatar ? user.avatar.url : null,
+          context: 'like_comment',
+          recepient: comment.user_id,
+          content: {
+            text: comment.content,
+            post_id,
+            post_picture: post.picture ? post.picture.url : null,
+            comment_id,
+            comment_picture: null,
+          },
+          dispatcher: {
+            id: user_id,
+            username: user.username,
+            name: user.name ? user.name : null,
+            avatar: user.avatar ? user.avatar.url : null,
+          },
         });
       }
 
@@ -83,4 +102,4 @@ class PostLikeController {
   }
 }
 
-export default new PostLikeController();
+export default new CommentLikeController();

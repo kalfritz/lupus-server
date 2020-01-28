@@ -1,23 +1,33 @@
 import mongoose from 'mongoose';
 
+const contentSchema = new mongoose.Schema({
+  text: String,
+  post_id: Number,
+  post_picture: String,
+  comment_id: Number,
+  comment_picture: String,
+});
+
+const dispatcherSchema = new mongoose.Schema({
+  id: Number,
+  name: String,
+  username: String,
+  avatar: String,
+});
+
 const notificationSchema = new mongoose.Schema(
   {
-    content: {
+    context: {
       type: String,
+      enum: ['like_post', 'like_comment', 'comment_post', 'friendship'],
       required: true,
     },
-    picture: {
-      type: String,
-      required: false,
-    },
-    user: {
+    recepient: {
       type: Number,
       required: true,
     },
-    user_avatar: {
-      type: String,
-      required: false,
-    },
+    content: contentSchema,
+    dispatcher: dispatcherSchema,
     read: {
       type: Boolean,
       required: true,

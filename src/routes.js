@@ -16,6 +16,7 @@ import FriendController from './app/controllers/FriendController';
 import SentFriendRequestController from './app/controllers/SentFriendRequestController';
 import ReceivedFriendRequestController from './app/controllers/ReceivedFriendRequestController';
 import BlockController from './app/controllers/BlockController';
+import NotificationController from './app/controllers/NotificationController';
 
 import authMiddleware from './app/middlewares/auth';
 import friendsMiddleware from './app/middlewares/friends';
@@ -32,6 +33,8 @@ routes.delete('/users', authMiddleware, UserController.delete);
 routes.post('/sessions', SessionController.store);
 
 routes.post('/files', upload.single('file'), FileController.store);
+
+routes.get('/notifications', authMiddleware, NotificationController.index);
 
 routes.get(
   '/timeline/:person_id',
@@ -53,7 +56,7 @@ routes.get(
   blocksMiddleware,
   PostController.show
 );
-routes.post('/posts', authMiddleware, PostController.store);
+routes.post('/posts', authMiddleware, friendsMiddleware, PostController.store);
 routes.put('/posts/:post_id', authMiddleware, PostController.update);
 routes.delete('/posts/:post_id', authMiddleware, PostController.delete);
 
