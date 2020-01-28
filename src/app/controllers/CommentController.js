@@ -70,6 +70,15 @@ class CommentController {
     const { blocksIds } = req;
     const { post_id } = req.params;
 
+    const cacheKey = `user:${userId}:posts:${page}`;
+    const cached = await Cache.get(cacheKey);
+    if (cached) {
+      console.log('it will return cached');
+      return res.json(cached);
+    }
+
+    console.log('querying..');
+
     const comments = await Comment.findAll({
       where: {
         post_id,
