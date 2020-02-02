@@ -35,6 +35,17 @@ routes.post('/sessions', SessionController.store);
 routes.post('/files', upload.single('file'), FileController.store);
 
 routes.get('/notifications', authMiddleware, NotificationController.index);
+routes.put('/notifications', authMiddleware, NotificationController.updateAll);
+routes.put(
+  '/notifications/:notif_id',
+  authMiddleware,
+  NotificationController.update
+);
+routes.delete(
+  '/notifications/:notif_id',
+  authMiddleware,
+  NotificationController.delete
+);
 
 routes.get(
   '/timeline/:person_id',

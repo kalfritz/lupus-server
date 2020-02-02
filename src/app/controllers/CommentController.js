@@ -58,11 +58,12 @@ class CommentController {
     }
 
     const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
-    usersThatHaveThisPostCached.length > 0 &&
-      (await Cache.invalidateManyPosts([
-        ...usersThatHaveThisPostCached,
-        userId,
-      ])); //remember to remove the userId
+    usersThatHaveThisPostCached && usersThatHaveThisPostCached.length > 0
+      ? await Cache.invalidateManyPosts([
+          ...usersThatHaveThisPostCached,
+          userId,
+        ])
+      : null; //remember to remove the userId
 
     return res.json(comment);
   }
@@ -70,12 +71,7 @@ class CommentController {
     const { blocksIds } = req;
     const { post_id } = req.params;
 
-    const cacheKey = `user:${userId}:posts:${page}`;
-    const cached = await Cache.get(cacheKey);
-    if (cached) {
-      console.log('it will return cached');
-      return res.json(cached);
-    }
+   
 
     console.log('querying..');
 

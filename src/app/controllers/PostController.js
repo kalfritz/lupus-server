@@ -184,7 +184,6 @@ class PostController {
               model: User,
               as: 'user',
               attributes: ['id', 'name', 'username', 'email'],
-
               include: [
                 {
                   model: File,
@@ -196,6 +195,13 @@ class PostController {
             {
               model: User,
               as: 'likes',
+              include: [
+                {
+                  model: File,
+                  as: 'avatar',
+                  attributes: ['id', 'url', 'path'],
+                },
+              ],
             },
           ],
         },
