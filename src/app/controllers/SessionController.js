@@ -18,7 +18,7 @@ class SessionController {
       return res.status(401).json({ error: 'Password does not match' });
     }
 
-    const { id, name, username, avatar } = user;
+    const { id, name, username, avatar, bio, location } = user;
 
     return res.json({
       user: {
@@ -27,6 +27,7 @@ class SessionController {
         email,
         username,
         avatar,
+        bio,location
       },
       token: await User.signToken({ id }),
     });

@@ -1,29 +1,32 @@
 import Post from '../models/Post';
-import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
 import { Op } from 'sequelize';
 
-class TimelineController {
+class PhotoController {
   async index(req, res) {
     let { blocksIds } = req;
     const { person_id } = req.params;
+    const { limit = 50, page = 1 } = req.query;
 
     blocksIds = blocksIds || [];
 
     if (blocksIds.includes(person_id)) {
-      throw new Error('You cannot access this page');
+      throw new Error('Unavailable content');
     }
 
     const posts = await Post.findAll({
       where: {
         user_id: person_id,
       },
+      limit,
+      offset: (page - 1) * limit,
       include: [
         {
           model: File,
           as: 'picture',
           attributes: ['id', 'path', 'url'],
+          required: true,
         },
         {
           model: User,
@@ -37,46 +40,7 @@ class TimelineController {
             },
           ],
         },
-        {
-          model: Comment,
-          as: 'comments',
-          where: {
-            user_id: { [Op.notIn]: blocksIds },
-          },
-          required: false,
-          order: [['created_at', 'ASC']],
-          limit: 3,
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: ['id', 'name', 'username', 'email'],
-              where: {
-                id: {
-                  [Op.notIn]: blocksIds,
-                },
-              },
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'url', 'path'],
-                },
-              ],
-            },
-            {
-              model: User,
-              as: 'likes',
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'url', 'path'],
-                },
-              ],
-            },
-          ],
-        },
+
         {
           model: User,
           as: 'likes',
@@ -103,4 +67,4 @@ class TimelineController {
   }
 }
 
-export default new TimelineController();
+export default new PhotoController();

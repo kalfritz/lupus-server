@@ -17,6 +17,8 @@ import SentFriendRequestController from './app/controllers/SentFriendRequestCont
 import ReceivedFriendRequestController from './app/controllers/ReceivedFriendRequestController';
 import BlockController from './app/controllers/BlockController';
 import NotificationController from './app/controllers/NotificationController';
+import FriendListController from './app/controllers/FriendListController';
+import PhotoController from './app/controllers/PhotoController';
 
 import authMiddleware from './app/middlewares/auth';
 import friendsMiddleware from './app/middlewares/friends';
@@ -25,7 +27,7 @@ import blocksMiddleware from './app/middlewares/blocks';
 const routes = new Router();
 const upload = multer(multerConfig);
 
-routes.get('/users/:user_id', UserController.show);
+routes.get('/users/:username', UserController.show);
 routes.post('/users', UserController.store);
 routes.put('/users', authMiddleware, UserController.update);
 routes.delete('/users', authMiddleware, UserController.delete);
@@ -165,6 +167,20 @@ routes.post(
   authMiddleware,
   friendsMiddleware,
   CommentLikeController.store
+);
+
+routes.get(
+  '/friendlist',
+  authMiddleware,
+  friendsMiddleware,
+  FriendListController.index
+);
+
+routes.get(
+  '/photos/:person_id',
+  authMiddleware,
+  blocksMiddleware,
+  PhotoController.index
 );
 
 export default routes;

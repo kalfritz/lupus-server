@@ -122,7 +122,6 @@ class PostController {
   async index(req, res) {
     const { userId, friendsIds, blocksIds } = req;
     const { page = 1 } = req.query;
-    console.log('fi:', friendsIds);
 
     const cacheKey = `user:${userId}:posts:${page}`;
     const cached = await Cache.get(cacheKey);

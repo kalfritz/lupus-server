@@ -85,9 +85,14 @@ class UserController {
     return res.json(deletedUser);
   }
   async show(req, res) {
-    const { user_id } = req.params;
+    const { username } = req.params;
 
-    const user = await User.findByPk(user_id, {
+    console.log(username);
+
+    const user = await User.findOne({
+      where: {
+        username,
+      },
       include: [
         {
           model: File,
@@ -97,7 +102,11 @@ class UserController {
       ],
     });
 
-    return res.json(user);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    } else {
+      return res.json(user);
+    }
   }
 }
 
