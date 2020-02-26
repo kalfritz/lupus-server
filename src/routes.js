@@ -19,6 +19,7 @@ import BlockController from './app/controllers/BlockController';
 import NotificationController from './app/controllers/NotificationController';
 import FriendListController from './app/controllers/FriendListController';
 import PhotoController from './app/controllers/PhotoController';
+import MutualFriendController from './app/controllers/MutualFriendController';
 
 import authMiddleware from './app/middlewares/auth';
 import friendsMiddleware from './app/middlewares/friends';
@@ -85,7 +86,7 @@ routes.delete(
 
 routes.get('/friendships', authMiddleware, FriendshipController.index);
 routes.get(
-  '/friendships/:user_id/friend/:friend_id',
+  '/friendships/:person_id',
   authMiddleware,
   FriendshipController.show
 );
@@ -104,7 +105,15 @@ routes.get(
   '/friends/:user_id',
   authMiddleware,
   friendsMiddleware,
+  blocksMiddleware,
   FriendController.index
+);
+
+routes.get(
+  '/mutualfriends/:person_id',
+  authMiddleware,
+  friendsMiddleware,
+  MutualFriendController.show
 );
 
 routes.get(

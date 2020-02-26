@@ -41,13 +41,41 @@ class App {
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
       connectedUsers = await IoRedis.connectAnUser({ socket, user_id });
-      console.log('connected users:', connectedUsers);
+      console.log('connection: ', user_id, 'e', socket.id);
 
-      socket.on('like', async socket => {});
+      socket.broadcast.emit('FRIEND_SIGNED_IN', {
+        params: {
+          friend_id: Number(user_id),
+        },
+      });
+
+      socket.on('like', async data => {});
+
+      socket.on('SIGN_OUT', async ({ query }) => {
+        const { user_id } = query;
+        console.log(`${user_id} signed out`);
+        await IoRedis.disconnectAnUser({ socket });
+
+        console.log('attempting to emit');
+
+        socket.broadcast.emit('FRIEND_SIGNED_OUT', {
+          params: {
+            friend_id: user_id,
+          },
+        });
+      });
 
       socket.on('disconnect', async () => {
         console.log(socket.id);
         console.log(':(');
+        console.log('disconnected');
+
+        socket.broadcast.emit('FRIEND_SIGNED_OUT', {
+          params: {
+            friend_id: Number(user_id),
+          },
+        });
+
         await IoRedis.disconnectAnUser({ socket });
       });
     });

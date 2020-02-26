@@ -32,6 +32,11 @@ class PostLikeController {
           as: 'avatar',
           attributes: ['id', 'path', 'url'],
         },
+        {
+          model: File,
+          as: 'cover',
+          attributes: ['id', 'path', 'url'],
+        },
       ],
     });
 
@@ -85,11 +90,16 @@ class PostLikeController {
     const post = await Post.findByPk(post_id);
 
     const likes = await post.getLikes({
-      attributes: ['id', 'name', 'username'],
+      attributes: ['id', 'name', 'username', 'bio', 'location'],
       include: [
         {
           model: File,
           as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+        {
+          model: File,
+          as: 'cover',
           attributes: ['id', 'path', 'url'],
         },
       ],

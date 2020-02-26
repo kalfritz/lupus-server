@@ -58,6 +58,7 @@ class CommentController {
     }
 
     const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
+
     usersThatHaveThisPostCached && usersThatHaveThisPostCached.length > 0
       ? await Cache.invalidateManyPosts([
           ...usersThatHaveThisPostCached,
@@ -70,8 +71,6 @@ class CommentController {
   async index(req, res) {
     const { blocksIds } = req;
     const { post_id } = req.params;
-
-   
 
     console.log('querying..');
 
@@ -88,19 +87,24 @@ class CommentController {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'username'],
+          attributes: ['id', 'name', 'username', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
               attributes: ['id', 'path', 'url'],
             },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'url', 'path'],
+            },
           ],
         },
         {
           model: User,
           as: 'likes',
-          attributes: ['id', 'name', 'username', 'email'],
+          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
           order: [['created_at', 'ASC']],
           /*where: {
             /*I found that I dont need to do that as
@@ -116,6 +120,11 @@ class CommentController {
             {
               model: File,
               as: 'avatar',
+              attributes: ['id', 'url', 'path'],
+            },
+            {
+              model: File,
+              as: 'cover',
               attributes: ['id', 'url', 'path'],
             },
           ],

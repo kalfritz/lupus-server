@@ -17,8 +17,14 @@ class UserController {
         return res.status(400).json({ error: 'Duplicated email' });
       }
 
-      const { id } = await User.create(req.body);
+      const user = await User.create(req.body);
 
+      user.avatar_id = 45;
+      user.cover_id = 32;
+
+      await user.save();
+
+      const { id } = user;
       return res.json({
         user: { id, username, email },
         token: await User.signToken({ id }),
@@ -31,7 +37,7 @@ class UserController {
     const { userId } = req;
     const { email, oldPassword } = req.body;
 
-    const user = await User.findByPk(userId);
+    const user = await User.scope('withPassword').findByPk(userId);
 
     if (email && email !== user.email) {
       const userExists = await User.findOne({
@@ -56,16 +62,31 @@ class UserController {
 
     await user.update(req.body);
 
-    const { id, name, username, avatar, location, bio } = await User.findByPk(
-      userId,
-      {
-        include: [
-          { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
-        ],
-      }
-    );
+    const {
+      id,
+      name,
+      username,
+      avatar,
+      cover,
+      location,
+      bio,
+    } = await User.findByPk(userId, {
+      include: [
+        { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+        { model: File, as: 'cover', attributes: ['id', 'path', 'url'] },
+      ],
+    });
 
-    return res.json({ id, name, email, username, avatar, location, bio });
+    return res.json({
+      id,
+      name,
+      email,
+      username,
+      cover,
+      avatar,
+      location,
+      bio,
+    });
   }
   async delete(req, res) {
     const { userId } = req;
@@ -97,7 +118,12 @@ class UserController {
         {
           model: File,
           as: 'avatar',
-          attributes: ['name', 'path', 'url'],
+          attributes: ['id', 'name', 'path', 'url'],
+        },
+        {
+          model: File,
+          as: 'cover',
+          attributes: ['id', 'path', 'url'],
         },
       ],
     });

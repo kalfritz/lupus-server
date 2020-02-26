@@ -21,6 +21,7 @@ class PhotoController {
       },
       limit,
       offset: (page - 1) * limit,
+      order: [['created_at', 'DESC']],
       include: [
         {
           model: File,
@@ -36,6 +37,11 @@ class PhotoController {
             {
               model: File,
               as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+            {
+              model: File,
+              as: 'cover',
               attributes: ['id', 'path', 'url'],
             },
           ],
@@ -57,6 +63,11 @@ class PhotoController {
               model: File,
               as: 'avatar',
               attributes: ['id', 'url', 'path'],
+            },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'path', 'url'],
             },
           ],
         },

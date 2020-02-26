@@ -13,11 +13,18 @@ class MyFriendList {
             [Op.in]: friendsIds,
           },
         },
-        include: {
-          model: File,
-          as: 'avatar',
-          attributes: ['id', 'path', 'url'],
-        },
+        include: [
+          {
+            model: File,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
+          },
+          {
+            model: File,
+            as: 'cover',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
       });
 
       const friendsWithOnlineInfo = friends.map(friend => {

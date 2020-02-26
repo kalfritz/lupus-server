@@ -2,61 +2,100 @@ import User from '../models/User';
 import File from '../models/File';
 import UserRelationship from '../models/UserRelationship';
 import { Op } from 'sequelize';
+import SeeFriendshipStatus from '../services/SeeFriendshipStatus';
 
 class FriendController {
   async index(req, res) {
-    const { user_id } = req.params;
-    const { friendsIds: visitorFriendsIds } = req;
+    try {
+      let { user_id } = req.params;
+      const { limit = 50 } = req.query;
+      const { userId, friendsIds: visitorFriendsIds, blocksIds } = req;
 
-    const [friendships_first, friendships_second] = await Promise.all([
-      UserRelationship.findAll({
+      user_id = Number(user_id);
+
+      const {
+        count,
+        rows: friendshipsOfUserBeingFetched,
+      } = await UserRelationship.findAndCountAll({
         where: {
           status: 'friends',
-          user_second_id: user_id,
+          [Op.or]: [
+            {
+              user_first_id: user_id,
+              user_second_id: {
+                [Op.notIn]: blocksIds,
+              },
+            },
+            {
+              user_first_id: {
+                [Op.notIn]: blocksIds,
+              },
+              user_second_id: user_id,
+            },
+          ],
         },
-      }),
-      UserRelationship.findAll({
+        limit,
+      });
+
+      let friendsIds = [];
+
+      friendsIds = friendshipsOfUserBeingFetched.map(friendship => {
+        if (friendship.user_first_id === user_id) {
+          return friendship.user_second_id;
+        } else if (friendship.user_second_id === user_id) {
+          return friendship.user_first_id;
+        }
+      });
+
+      const friendships = await SeeFriendshipStatus.run({
+        user_id: userId,
+        friendsIds,
+      });
+
+      let friends = await User.findAll({
         where: {
-          status: 'friends',
-          user_first_id: user_id,
+          id: {
+            [Op.in]: friendsIds,
+          },
         },
-      }),
-    ]);
+        include: [
+          {
+            model: File,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
+          },
+          {
+            model: File,
+            as: 'cover',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
+      });
 
-    let friendsIds = [];
+      friends = friends.map(friend => {
+        friend.dataValues.mutualFriend = visitorFriendsIds.includes(friend.id)
+          ? true
+          : false;
 
-    if (friendships_first.length > 0) {
-      friendships_first.forEach(friendship =>
-        friendsIds.push(Number(friendship.user_first_id))
-      );
+        if (friend.id === userId) {
+          friend.dataValues.status = null;
+        } else if (friendships.friendsIds.includes(friend.id)) {
+          friend.dataValues.status = 'friends';
+        } else if (friendships.sentIds.includes(friend.id)) {
+          friend.dataValues.status = 'sent';
+        } else if (friendships.receivedIds.includes(friend.id)) {
+          friend.dataValues.status = 'received';
+        } else {
+          friend.dataValues.status = 'add';
+        }
+
+        return friend;
+      });
+
+      return res.json({ friends, count });
+    } catch (err) {
+      console.log(err);
     }
-    if (friendships_second.length > 0) {
-      friendships_second.forEach(friendship =>
-        friendsIds.push(Number(friendship.user_second_id))
-      );
-    }
-
-    const friends = await User.findAll({
-      where: {
-        id: {
-          [Op.in]: friendsIds,
-        },
-      },
-      include: {
-        model: File,
-        as: 'avatar',
-        attributes: ['id', 'path', 'url'],
-      },
-    });
-
-    const friendsAndMutual = friends.map(friend => {
-      friend.dataValues.mutualFriend = visitorFriendsIds.includes(friend.id)
-        ? true
-        : false;
-      return friend;
-    });
-
-    return res.json(friendsAndMutual);
   }
 }
 

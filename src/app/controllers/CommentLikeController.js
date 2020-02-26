@@ -105,7 +105,7 @@ class CommentLikeController {
     }
 
     const likes = await comment.getLikes({
-      attributes: ['id', 'name', 'username'],
+      attributes: ['id', 'name', 'username', 'bio', 'location'],
       include: [
         {
           model: File,

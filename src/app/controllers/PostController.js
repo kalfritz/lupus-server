@@ -7,17 +7,51 @@ import Cache from '../../lib/Cache';
 
 class PostController {
   async store(req, res) {
-    const { content } = req.body;
+    const { content, picture_id } = req.body;
     const { userId, friendsIds } = req;
 
     const post = await Post.create({
       user_id: userId,
       content,
+      picture_id,
     });
 
     await Cache.invalidateManyPosts([...friendsIds, userId]); //remember to remove the userId
 
-    return res.json(post);
+    const newPost = await Post.findOne({
+      where: {
+        id: post.id,
+      },
+      include: [
+        {
+          model: File,
+          as: 'picture',
+          attributes: ['id', 'path', 'url'],
+        },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'username'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+      ],
+    });
+
+    newPost.dataValues.likes = [];
+    newPost.dataValues.comments = [];
+
+    return res.json(newPost);
   }
   async show(req, res) {
     let { blocksIds } = req;
@@ -36,11 +70,16 @@ class PostController {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'username'],
+          attributes: ['id', 'name', 'username', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+            {
+              model: File,
+              as: 'cover',
               attributes: ['id', 'path', 'url'],
             },
           ],
@@ -61,12 +100,24 @@ class PostController {
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'username', 'email'],
+              attributes: [
+                'id',
+                'name',
+                'username',
+                'email',
+                'bio',
+                'location',
+              ],
               include: [
                 {
                   model: File,
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
+                },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
                 },
               ],
             },
@@ -74,7 +125,14 @@ class PostController {
               model: User,
               as: 'likes',
               order: [['created_at', 'DESC']],
-              attributes: ['id', 'name', 'username', 'email'],
+              attributes: [
+                'id',
+                'name',
+                'username',
+                'email',
+                'bio',
+                'location',
+              ],
               required: false,
               where: {
                 id: {
@@ -87,6 +145,11 @@ class PostController {
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
                 },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
+                },
               ],
             },
           ],
@@ -95,7 +158,7 @@ class PostController {
           model: User,
           as: 'likes',
           order: [['created_at', 'DESC']],
-          attributes: ['id', 'name', 'username', 'email'],
+          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
           required: false,
           where: {
             id: {
@@ -107,6 +170,11 @@ class PostController {
               model: File,
               as: 'avatar',
               attributes: ['id', 'url', 'path'],
+            },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'path', 'url'],
             },
           ],
         },
@@ -150,11 +218,16 @@ class PostController {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'username'],
+          attributes: ['id', 'name', 'username', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+            {
+              model: File,
+              as: 'cover',
               attributes: ['id', 'path', 'url'],
             },
           ],
@@ -182,12 +255,24 @@ class PostController {
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'username', 'email'],
+              attributes: [
+                'id',
+                'name',
+                'username',
+                'email',
+                'bio',
+                'location',
+              ],
               include: [
                 {
                   model: File,
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
+                },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
                 },
               ],
             },
@@ -199,6 +284,11 @@ class PostController {
                   model: File,
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
+                },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
                 },
               ],
             },
@@ -214,12 +304,17 @@ class PostController {
               [Op.notIn]: blocksIds,
             },
           },
-          attributes: ['id', 'name', 'username', 'email'],
+          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
               attributes: ['id', 'url', 'path'],
+            },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'path', 'url'],
             },
           ],
         },

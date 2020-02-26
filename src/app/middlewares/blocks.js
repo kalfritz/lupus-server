@@ -33,8 +33,10 @@ export default async (req, res, next) => {
       );
     }
     req.blocksIds = blocksIds;
+
     next();
   } catch (err) {
+    console.log(err);
     return res.status(500).json(err);
   }
 };

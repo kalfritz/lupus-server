@@ -19,6 +19,7 @@ class TimelineController {
       where: {
         user_id: person_id,
       },
+      order: [['created_at', 'DESC']],
       include: [
         {
           model: File,
@@ -28,11 +29,16 @@ class TimelineController {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'username'],
+          attributes: ['id', 'name', 'username', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
+              attributes: ['id', 'path', 'url'],
+            },
+            {
+              model: File,
+              as: 'cover',
               attributes: ['id', 'path', 'url'],
             },
           ],
@@ -50,7 +56,14 @@ class TimelineController {
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'username', 'email'],
+              attributes: [
+                'id',
+                'name',
+                'username',
+                'email',
+                'bio',
+                'location',
+              ],
               where: {
                 id: {
                   [Op.notIn]: blocksIds,
@@ -62,6 +75,11 @@ class TimelineController {
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
                 },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
+                },
               ],
             },
             {
@@ -72,6 +90,11 @@ class TimelineController {
                   model: File,
                   as: 'avatar',
                   attributes: ['id', 'url', 'path'],
+                },
+                {
+                  model: File,
+                  as: 'cover',
+                  attributes: ['id', 'path', 'url'],
                 },
               ],
             },
@@ -87,12 +110,17 @@ class TimelineController {
           },
           required: false,
           order: ['created_at', 'DESC'],
-          attributes: ['id', 'name', 'username', 'email'],
+          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
           include: [
             {
               model: File,
               as: 'avatar',
               attributes: ['id', 'url', 'path'],
+            },
+            {
+              model: File,
+              as: 'cover',
+              attributes: ['id', 'path', 'url'],
             },
           ],
         },

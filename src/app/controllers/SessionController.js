@@ -9,6 +9,7 @@ class SessionController {
       where: { email },
       include: [
         { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+        { model: File, as: 'cover', attributes: ['id', 'path', 'url'] },
       ],
     });
     if (!user) {
@@ -18,7 +19,7 @@ class SessionController {
       return res.status(401).json({ error: 'Password does not match' });
     }
 
-    const { id, name, username, avatar, bio, location } = user;
+    const { id, name, username, avatar, cover, bio, location } = user;
 
     return res.json({
       user: {
@@ -27,7 +28,9 @@ class SessionController {
         email,
         username,
         avatar,
-        bio,location
+        bio,
+        location,
+        cover,
       },
       token: await User.signToken({ id }),
     });

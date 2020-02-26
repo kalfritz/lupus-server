@@ -32,12 +32,17 @@ class Cache {
   }
 
   async disconnectAnUser({ socket }) {
+    console.log('disconnecting an user');
+    console.log('socketid', socket.id);
     const key = 'io:connected_users';
     let connectedUsers = await this.get(key);
+    console.log('connectedUsers', connectedUsers);
     const userId = Object.keys(connectedUsers).find(
       socket_id => connectedUsers[socket_id] === socket.id
     );
+    console.log('userId', userId);
     connectedUsers[userId] = undefined;
+    console.log('newconnected users', connectedUsers);
     await this.set(key, connectedUsers);
 
     return await this.get(key);
