@@ -72,7 +72,7 @@ class CommentController {
     const { blocksIds } = req;
     const { post_id } = req.params;
 
-    console.log('querying..');
+    console.log('querying..............');
 
     const comments = await Comment.findAll({
       where: {
@@ -106,16 +106,12 @@ class CommentController {
           as: 'likes',
           attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
           order: [['created_at', 'ASC']],
-          /*where: {
-            /*I found that I dont need to do that as
-            the where clause over there in the top already take care
-            of do not returning the blocked users that liked. 
-            In fact for some reason adding this where clause does 
-            break the query.
+          where: {
             id: {
               [Op.notIn]: blocksIds,
             },
-          },*/
+          },
+          required: false,
           include: [
             {
               model: File,

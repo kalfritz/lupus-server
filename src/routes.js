@@ -127,12 +127,7 @@ routes.get(
   ReceivedFriendRequestController.index
 );
 
-routes.get(
-  '/blockedusers',
-  authMiddleware,
-  blocksMiddleware,
-  BlockController.index
-);
+routes.get('/blockedusers', authMiddleware, BlockController.index);
 routes.post('/blockedusers/:person_id', authMiddleware, BlockController.store);
 
 routes.get(

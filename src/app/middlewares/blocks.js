@@ -8,13 +8,21 @@ export default async (req, res, next) => {
     const [blocks_first, blocks_second] = await Promise.all([
       UserRelationship.findAll({
         where: {
-          [Op.or]: [{ status: 'block_first_second' }, { status: 'block_both' }],
+          [Op.or]: [
+            { status: 'block_first_second' },
+            { status: 'block_first_second' },
+            { status: 'block_both' },
+          ],
           user_first_id: user_id,
         },
       }),
       UserRelationship.findAll({
         where: {
-          status: 'block_second_first',
+          [Op.or]: [
+            { status: 'block_first_second' },
+            { status: 'block_first_second' },
+            { status: 'block_both' },
+          ],
           user_second_id: user_id,
         },
       }),

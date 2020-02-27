@@ -85,6 +85,10 @@ class TimelineController {
             {
               model: User,
               as: 'likes',
+              required: false,
+              where: {
+                id: { [Op.notIn]: blocksIds },
+              },
               include: [
                 {
                   model: File,

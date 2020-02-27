@@ -5,7 +5,41 @@ import { Op } from 'sequelize';
 
 class BlockController {
   async index(req, res) {
-    const { blocksIds } = req;
+    const { userId } = req;
+    const relationships = await UserRelationship.findAll({
+      where: {
+        [Op.or]: [
+          {
+            status: 'block_first_second',
+            user_first_id: userId,
+          },
+          {
+            status: 'block_second_first',
+            user_second_id: userId,
+          },
+          {
+            status: 'block_both',
+            [Op.or]: [{ user_first_id: userId }, { user_second_id: userId }],
+          },
+        ],
+      },
+    });
+
+    console.log(relationships);
+
+    let blocksIds = [];
+
+    if (relationships.length > 0) {
+      relationships.forEach(relationship => {
+        if (relationship.dataValues.user_first_id === userId) {
+          blocksIds.push(Number(relationship.dataValues.user_second_id));
+        } else {
+          blocksIds.push(Number(relationship.dataValues.user_first_id));
+        }
+      });
+    }
+
+    console.log(blocksIds);
 
     const blockedUsers = await User.findAll({
       where: {
