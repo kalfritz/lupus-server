@@ -50,7 +50,7 @@ class TimelineController {
             user_id: { [Op.notIn]: blocksIds },
           },
           required: false,
-          order: [['created_at', 'ASC']],
+          order: [['created_at', 'DESC']],
           limit: 3,
           include: [
             {

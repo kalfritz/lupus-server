@@ -153,7 +153,12 @@ routes.delete(
   CommentController.delete
 );
 
-routes.get('/posts/:post_id/likes', authMiddleware, PostLikeController.index);
+routes.get(
+  '/posts/:post_id/likes',
+  authMiddleware,
+  blocksMiddleware,
+  PostLikeController.index
+);
 routes.post(
   '/posts/:post_id/likes',
   authMiddleware,
@@ -164,6 +169,7 @@ routes.post(
 routes.get(
   '/posts/:post_id/comments/:comment_id/likes',
   authMiddleware,
+  blocksMiddleware,
   CommentLikeController.index
 );
 routes.post(

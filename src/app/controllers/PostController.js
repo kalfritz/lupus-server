@@ -303,6 +303,7 @@ class PostController {
         {
           model: User,
           as: 'likes',
+          /*limit: 19,*/
           order: [['created_at', 'DESC']],
           required: false,
           where: {
@@ -310,19 +311,7 @@ class PostController {
               [Op.notIn]: blocksIds,
             },
           },
-          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
-          include: [
-            {
-              model: File,
-              as: 'avatar',
-              attributes: ['id', 'url', 'path'],
-            },
-            {
-              model: File,
-              as: 'cover',
-              attributes: ['id', 'path', 'url'],
-            },
-          ],
+          attributes: ['id', 'name', 'username'],
         },
       ],
     });
