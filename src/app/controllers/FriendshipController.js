@@ -2,6 +2,8 @@ import User from '../models/User';
 import File from '../models/File';
 import UserRelationship from '../models/UserRelationship';
 
+import Cache from '../../lib/Cache';
+
 import Notification from '../schemas/Notification';
 import { Op } from 'sequelize';
 
@@ -128,6 +130,11 @@ class FriendshipController {
           friendship_time: new Date(),
         },
       });
+
+      Promise.all([
+        Cache.invalidatePrefix(`user:${Number(user_first_id)}`),
+        Cache.invalidatePrefix(`user:${Number(user_second_id)}`),
+      ]);
 
       if (created) {
         return res.json(relationship);
@@ -291,6 +298,11 @@ class FriendshipController {
     }
 
     const deletedRelationship = await relationship.destroy();
+
+    Promise.all([
+      Cache.invalidatePrefix(`user:${Number(user_first_id)}`),
+      Cache.invalidatePrefix(`user:${Number(user_second_id)}`),
+    ]);
 
     return res.json(deletedRelationship);
   }

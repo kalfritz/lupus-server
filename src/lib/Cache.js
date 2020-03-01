@@ -10,7 +10,7 @@ class Cache {
   }
 
   set(key, value) {
-    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60 * 24);
+    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 1 * 1);
   }
 
   async get(key) {
@@ -24,10 +24,13 @@ class Cache {
   }
 
   async invalidatePrefix(prefix) {
+    console.log(`cache:${prefix}:*`);
     const keys = await this.redis.keys(`cache:${prefix}:*`);
+    console.log(keys);
+    console.log('.............');
     const keysWithoutPrefix = keys.map(key => key.replace('cache:', ''));
 
-    return this.redis.del(keysWithoutPrefix);
+    return keys.length > 0 && this.redis.del(keysWithoutPrefix);
   }
 
   async invalidateManyPosts(idsArray) {

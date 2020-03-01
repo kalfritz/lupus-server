@@ -2,7 +2,7 @@ import Post from '../models/Post';
 import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
-import sequelize, { Op } from 'sequelize';
+import { Op } from 'sequelize';
 import Cache from '../../lib/Cache';
 
 class PostController {

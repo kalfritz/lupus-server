@@ -12,8 +12,12 @@ import Cache from '../../lib/Cache';
 class CommentController {
   async store(req, res) {
     const { content } = req.body;
-    const { userId, friendsIds } = req;
-    const { post_id } = req.params;
+    const { userId, blocksIds } = req;
+    const { post_id, op_id } = req.params;
+
+    if (blocksIds.includes(op_id)) {
+      throw new Error('Unavailable content');
+    }
 
     const comment = await Comment.create({
       user_id: userId,

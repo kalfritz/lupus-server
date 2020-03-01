@@ -11,8 +11,22 @@ import Cache from '../../lib/Cache';
 
 class PostLikeController {
   async store(req, res) {
-    const { userId: user_id, friendsIds } = req;
-    const { post_id } = req.params;
+    const { userId: user_id, blocksIds } = req;
+    let { post_id, op_id } = req.params;
+
+    post_id = Number(post_id);
+    op_id = Number(op_id);
+
+    console.log({ post_id, op_id, blocksIds });
+    let array = [1, 2, 3];
+    console.log(array);
+
+    if (blocksIds.includes(op_id)) {
+      console.log('vei');
+      throw new Error('Unavailable content');
+    }
+
+    console.log('cara');
 
     const post = await Post.findByPk(post_id, {
       include: [

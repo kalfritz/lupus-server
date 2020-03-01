@@ -1,6 +1,8 @@
 import User from '../models/User';
 import File from '../models/File';
 
+import Cache from '../../lib/Cache';
+
 class UserController {
   async store(req, res) {
     const { email, username } = req.body;
@@ -77,6 +79,8 @@ class UserController {
       ],
     });
 
+    Cache.invalidatePrefix(`user:${userId}`);
+
     return res.json({
       id,
       name,
@@ -102,6 +106,8 @@ class UserController {
     }
 
     const deletedUser = await user.destroy();
+
+    Cache.invalidatePrefix(`user:${userId}`);
 
     return res.json(deletedUser);
   }

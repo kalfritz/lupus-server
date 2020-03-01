@@ -13,9 +13,12 @@ import Cache from '../../lib/Cache';
 
 class CommentLikeController {
   async store(req, res) {
-    const { userId: user_id, friendsIds } = req;
-    const { post_id, comment_id } = req.params;
-    console.log('friends ids:', friendsIds);
+    const { userId: user_id, blocksIds } = req;
+    const { post_id, op_id, comment_id } = req.params;
+
+    if (blocksIds.includes(op_id)) {
+      throw new Error('Unavailable content');
+    }
 
     const post = await Post.findByPk(post_id, {
       include: [

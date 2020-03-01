@@ -137,9 +137,9 @@ routes.get(
   CommentController.index
 );
 routes.post(
-  '/posts/:post_id/comments',
+  '/posts/:post_id/op/:op_id/comments',
   authMiddleware,
-  friendsMiddleware,
+  blocksMiddleware,
   CommentController.store
 );
 routes.put(
@@ -160,9 +160,9 @@ routes.get(
   PostLikeController.index
 );
 routes.post(
-  '/posts/:post_id/likes',
+  '/posts/:post_id/op/:op_id/likes',
   authMiddleware,
-  friendsMiddleware,
+  blocksMiddleware,
   PostLikeController.store
 );
 
@@ -173,9 +173,9 @@ routes.get(
   CommentLikeController.index
 );
 routes.post(
-  '/posts/:post_id/comments/:comment_id/likes',
+  '/posts/:post_id/op/:op_id/comments/:comment_id/likes',
   authMiddleware,
-  friendsMiddleware,
+  blocksMiddleware,
   CommentLikeController.store
 );
 
