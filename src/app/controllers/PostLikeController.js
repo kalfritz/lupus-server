@@ -11,94 +11,100 @@ import Cache from '../../lib/Cache';
 
 class PostLikeController {
   async store(req, res) {
-    const { userId: user_id, blocksIds } = req;
-    let { post_id, op_id } = req.params;
+    try {
+      const { userId: user_id, blocksIds, io, socket } = req;
+      let { post_id, op_id } = req.params;
 
-    post_id = Number(post_id);
-    op_id = Number(op_id);
+      post_id = Number(post_id);
+      op_id = Number(op_id);
 
-    console.log({ post_id, op_id, blocksIds });
-    let array = [1, 2, 3];
-    console.log(array);
+      console.log({ post_id, op_id, blocksIds });
 
-    if (blocksIds.includes(op_id)) {
-      console.log('vei');
-      throw new Error('Unavailable content');
-    }
-
-    console.log('cara');
-
-    const post = await Post.findByPk(post_id, {
-      include: [
-        {
-          model: File,
-          as: 'picture',
-          attributes: ['id', 'path', 'url'],
-        },
-      ],
-    });
-
-    if (!post) {
-      throw new Error('Page does not exist');
-    }
-
-    const user = await User.findByPk(user_id, {
-      include: [
-        {
-          model: File,
-          as: 'avatar',
-          attributes: ['id', 'path', 'url'],
-        },
-        {
-          model: File,
-          as: 'cover',
-          attributes: ['id', 'path', 'url'],
-        },
-      ],
-    });
-
-    const isLiked = await post.hasLikes([user]);
-
-    if (isLiked) {
-      await post.removeLike(user);
-
-      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
-      usersThatHaveThisPostCached.length > 0 &&
-        (await Cache.invalidateManyPosts([
-          ...usersThatHaveThisPostCached,
-          user_id,
-        ])); //remember to remove the userId
-
-      return res.json({ added: false, removed: true });
-    } else {
-      await post.addLike(user);
-
-      if (user_id !== post.user_id) {
-        await Notification.create({
-          context: 'like_post',
-          recepient: post.user_id,
-          content: {
-            text: post.content,
-            post_id,
-            post_picture: post.picture ? post.picture.url : null,
-          },
-          dispatcher: {
-            id: user_id,
-            username: user.username,
-            name: user.name ? user.name : null,
-            avatar: user.avatar ? user.avatar.url : null,
-          },
-        });
+      if (blocksIds.includes(op_id)) {
+        throw new Error('Unavailable content');
       }
 
-      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
-      usersThatHaveThisPostCached.length > 0 &&
-        (await Cache.invalidateManyPosts([
-          ...usersThatHaveThisPostCached,
-          user_id,
-        ])); //remember to remove the userId
+      const post = await Post.findByPk(post_id, {
+        include: [
+          {
+            model: File,
+            as: 'picture',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
+      });
 
-      return res.json({ added: true, removed: false });
+      if (!post) {
+        throw new Error('Page does not exist');
+      }
+
+      const user = await User.findByPk(user_id, {
+        include: [
+          {
+            model: File,
+            as: 'avatar',
+            attributes: ['id', 'path', 'url'],
+          },
+          {
+            model: File,
+            as: 'cover',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
+      });
+
+      const isLiked = await post.hasLikes([user]);
+
+      const key = `post:${post.id}`;
+      const usersThatHaveThisPostCached = await Cache.get(key);
+      usersThatHaveThisPostCached && usersThatHaveThisPostCached.length > 0
+        ? await Cache.invalidateManyPosts([
+            ...usersThatHaveThisPostCached,
+            user_id,
+          ])
+        : null; //remember to remove the userId
+
+      const room = `post:${post_id}`;
+      io.to(room).emit('LIKE_POST', {
+        params: {
+          person: user,
+          post_id: Number(post_id),
+          addedLike: !isLiked,
+        },
+      });
+
+      console.log('rooms:', socket.rooms);
+      console.log(io.sockets.adapter.sids[socket.id]);
+
+      if (isLiked) {
+        await post.removeLike(user);
+
+        return res.json({ added: false, removed: true });
+      } else {
+        await post.addLike(user);
+
+        if (user_id !== post.user_id) {
+          await Notification.create({
+            context: 'like_post',
+            recepient: post.user_id,
+            content: {
+              text: post.content,
+              post_id,
+              post_picture: post.picture ? post.picture.url : null,
+            },
+            dispatcher: {
+              id: user_id,
+              username: user.username,
+              name: user.name ? user.name : null,
+              avatar: user.avatar ? user.avatar.url : null,
+            },
+          });
+        }
+
+        return res.json({ added: true, removed: false });
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
   async index(req, res) {

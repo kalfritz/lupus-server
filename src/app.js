@@ -37,6 +37,7 @@ class App {
 
   connections() {
     let connectedUsers;
+    let socketPassedToReq;
 
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
@@ -78,11 +79,14 @@ class App {
 
         await IoRedis.disconnectAnUser({ socket });
       });
+
+      socketPassedToReq = socket;
     });
 
     this.app.use((req, res, next) => {
       req.io = this.io;
       req.connectedUsers = connectedUsers;
+      req.socket = socketPassedToReq;
 
       return next();
     });

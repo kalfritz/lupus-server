@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 
-class Cache {
+class IoRedis {
   constructor() {
     this.redis = new Redis({
       host: process.env.REDIS_HOST,
@@ -10,7 +10,7 @@ class Cache {
   }
 
   set(key, value) {
-    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60 * 24);
+    return this.redis.set(key, JSON.stringify(value), 'EX', 60 * 60 * 1);
   }
 
   async get(key) {
@@ -32,21 +32,20 @@ class Cache {
   }
 
   async disconnectAnUser({ socket }) {
-    console.log('disconnecting an user');
-    console.log('socketid', socket.id);
-    const key = 'io:connected_users';
-    let connectedUsers = await this.get(key);
-    console.log('connectedUsers', connectedUsers);
-    const userId = Object.keys(connectedUsers).find(
-      socket_id => connectedUsers[socket_id] === socket.id
-    );
-    console.log('userId', userId);
-    connectedUsers[userId] = undefined;
-    console.log('newconnected users', connectedUsers);
-    await this.set(key, connectedUsers);
+    try {
+      //remove user from connected users
+      const key = 'io:connected_users';
+      let connectedUsers = await this.get(key);
+      const userId = Object.keys(connectedUsers).find(
+        socket_id => connectedUsers[socket_id] === socket.id
+      );
+      connectedUsers[userId] = undefined;
+      await this.set(key, connectedUsers);
 
-    return await this.get(key);
-    //connectedUsers
+      return await this.get(key);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   invalidate(key) {
@@ -55,21 +54,18 @@ class Cache {
 
   async invalidatePrefix(prefix) {
     const keys = await this.redis.keys(`io:${prefix}:*`);
+
     const keysWithoutPrefix = keys.map(key => key.replace('io:', ''));
 
     return this.redis.del(keysWithoutPrefix);
   }
 
-  async invalidateManyPosts(idsArray) {
-    console.log(idsArray);
-    idsArray.forEach(async id => {
-      console.log(id);
-      const keys = await this.redis.keys(`cache:user:${id}:posts:*`);
-      console.log(keys);
-      const keysWithoutPrefix = keys.map(key => key.replace('cache:', ''));
-      console.log(keysWithoutPrefix);
-      return keysWithoutPrefix.length > 0 && this.redis.del(keysWithoutPrefix);
-    });
+  async invalidateAllPostsThatAnUserIsListeningTo(userId) {
+    const keys = await this.redis.keys(`io:user:${userId}:posts`);
+
+    const keysWithoutPrefix = keys.map(key => key.replace('io:', ''));
+
+    return this.redis.del(keysWithoutPrefix);
   }
 }
-export default new Cache();
+export default new IoRedis();

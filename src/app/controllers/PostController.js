@@ -1,14 +1,18 @@
+import { parseISO, formatDistance, format } from 'date-fns';
+import en from 'date-fns/locale/en-US';
+
 import Post from '../models/Post';
 import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
 import { Op } from 'sequelize';
 import Cache from '../../lib/Cache';
+import IoRedis from '../../lib/IoRedis';
 
 class PostController {
   async store(req, res) {
     const { content, picture_id } = req.body;
-    const { userId, friendsIds } = req;
+    const { userId, friendsIds, socket } = req;
 
     const post = await Post.create({
       user_id: userId,
@@ -50,6 +54,8 @@ class PostController {
 
     newPost.dataValues.likes = [];
     newPost.dataValues.comments = [];
+
+    socket.join(`post:${newPost.id}`);
 
     return res.json(newPost);
   }
@@ -188,147 +194,206 @@ class PostController {
     return res.json(post);
   }
   async index(req, res) {
-    const { userId, friendsIds, blocksIds } = req;
-    const { page = 1 } = req.query;
+    try {
+      const { userId, friendsIds, blocksIds, socket } = req;
+      const { page = 1 } = req.query;
 
-    const cacheKey = `user:${userId}:posts:${page}`;
-    const cached = await Cache.get(cacheKey);
-    if (cached) {
-      console.log('it will return cached');
-      return res.json(cached);
-    }
+      const cacheKey = `user:${userId}:posts:${page}`;
+      const cached = await Cache.get(cacheKey);
 
-    console.log('querying..');
-    const posts = await Post.findAll({
-      where: {
-        user_id: {
-          [Op.in]: [...friendsIds, userId], //Remember to remove the user id later.
-          [Op.notIn]: blocksIds,
-        },
-      },
-      order: [['created_at', 'DESC']],
-      limit: 20,
-      offset: (page - 1) * 20,
-      include: [
-        {
-          model: File,
-          as: 'picture',
-          attributes: ['id', 'path', 'url'],
-        },
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'username', 'bio', 'location'],
-          include: [
-            {
-              model: File,
-              as: 'avatar',
-              attributes: ['id', 'path', 'url'],
-            },
-            {
-              model: File,
-              as: 'cover',
-              attributes: ['id', 'path', 'url'],
-            },
-          ],
-        },
-        {
-          model: Comment,
-          as: 'comments',
-          attributes: [
-            'id',
-            'user_id',
-            'post_id',
-            'content',
-            'created_at',
-            'updated_at',
-          ],
-          order: [['created_at', 'DESC']],
-          required: false,
-          where: {
-            user_id: {
-              [Op.notIn]: blocksIds,
-            },
+      if (cached) {
+        console.log('it will return cached');
+        cached.map(post => {
+          socket.join(`post:${post.id}`);
+
+          post.comments.map(comment => {
+            comment.timeDistance = formatDistance(
+              parseISO(comment.created_at),
+              new Date(),
+              {
+                locale: en,
+              }
+            );
+            return comment;
+          });
+          return post;
+        });
+
+        return res.json(cached);
+      }
+
+      console.log('querying..');
+      let posts = await Post.findAll({
+        where: {
+          user_id: {
+            [Op.in]: [...friendsIds, userId], //Remember to remove the user id later.
+            [Op.notIn]: blocksIds,
           },
-          limit: 3,
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: [
-                'id',
-                'name',
-                'username',
-                'email',
-                'bio',
-                'location',
-              ],
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'url', 'path'],
-                },
-                {
-                  model: File,
-                  as: 'cover',
-                  attributes: ['id', 'path', 'url'],
-                },
-              ],
-            },
-            {
-              model: User,
-              as: 'likes',
-              required: false,
-              where: {
-                id: {
-                  [Op.notIn]: blocksIds,
-                },
+        },
+        order: [['created_at', 'DESC']],
+        limit: 20,
+        offset: (page - 1) * 20,
+        include: [
+          {
+            model: File,
+            as: 'picture',
+            attributes: ['id', 'path', 'url'],
+          },
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name', 'username', 'bio', 'location'],
+            include: [
+              {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
               },
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'url', 'path'],
-                },
-                {
-                  model: File,
-                  as: 'cover',
-                  attributes: ['id', 'path', 'url'],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          model: User,
-          as: 'likes',
-          /*limit: 19,*/
-          order: [['created_at', 'DESC']],
-          required: false,
-          where: {
-            id: {
-              [Op.notIn]: blocksIds,
-            },
+              {
+                model: File,
+                as: 'cover',
+                attributes: ['id', 'path', 'url'],
+              },
+            ],
           },
-          attributes: ['id', 'name', 'username'],
-        },
-      ],
-    });
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: [
+              'id',
+              'user_id',
+              'post_id',
+              'content',
+              'created_at',
+              'updated_at',
+            ],
+            order: [['created_at', 'DESC']],
+            required: false,
+            where: {
+              user_id: {
+                [Op.notIn]: blocksIds,
+              },
+            },
+            limit: 3,
+            include: [
+              {
+                model: User,
+                as: 'user',
+                attributes: [
+                  'id',
+                  'name',
+                  'username',
+                  'email',
+                  'bio',
+                  'location',
+                ],
+                include: [
+                  {
+                    model: File,
+                    as: 'avatar',
+                    attributes: ['id', 'url', 'path'],
+                  },
+                  {
+                    model: File,
+                    as: 'cover',
+                    attributes: ['id', 'path', 'url'],
+                  },
+                ],
+              },
+              {
+                model: User,
+                as: 'likes',
+                required: false,
+                where: {
+                  id: {
+                    [Op.notIn]: blocksIds,
+                  },
+                },
+                include: [
+                  {
+                    model: File,
+                    as: 'avatar',
+                    attributes: ['id', 'url', 'path'],
+                  },
+                  {
+                    model: File,
+                    as: 'cover',
+                    attributes: ['id', 'path', 'url'],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            model: User,
+            as: 'likes',
+            /*limit: 19,*/
+            order: [['created_at', 'DESC']],
+            required: false,
+            where: {
+              id: {
+                [Op.notIn]: blocksIds,
+              },
+            },
+            attributes: ['id', 'name', 'username'],
+          },
+        ],
+      });
 
-    posts.forEach(async post => {
-      const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
-      usersThatHaveThisPostCached && usersThatHaveThisPostCached.length > 0
-        ? await Cache.set(`post:${post.id}`, [
-            ...usersThatHaveThisPostCached,
-            userId,
-          ])
-        : await Cache.set(`post:${post.id}`, [userId]);
-    });
+      const postsIds = posts.map(post => post.id);
+      console.log(postsIds);
+      await IoRedis.set(`user:${userId}:posts`, postsIds);
 
-    await Cache.set(cacheKey, posts); //user cache
+      posts = posts.map(post => {
+        socket.join(`post:${post.id}`);
 
-    return res.json(posts);
+        post.comments = post.comments.reverse().map(comment => {
+          comment.dataValues.timeDistance = formatDistance(
+            comment.dataValues.created_at,
+            new Date(),
+            {
+              locale: en,
+            }
+          );
+          comment.dataValues.time = format(
+            comment.dataValues.created_at,
+            "mm'/'dd'/'yy ',' h':'mm a",
+            {
+              locale: en,
+            }
+          );
+          comment.dataValues.liked = comment.likes.some(
+            like => like.id === userId
+          );
+          return comment;
+        });
+
+        post.dataValues.timeDistance = formatDistance(
+          post.dataValues.createdAt,
+          new Date(),
+          {
+            locale: en,
+          }
+        );
+        post.dataValues.time = format(
+          post.dataValues.createdAt,
+          "mm'/'dd'/'yy ',' h':'mm a",
+          {
+            locale: en,
+          }
+        );
+        post.dataValues.liked = post.likes.some(like => like.id === userId);
+        post.dataValues.editable = post.user.id === userId;
+
+        return post;
+      });
+
+      await Cache.set(cacheKey, posts); //user cache
+
+      return res.json(posts);
+    } catch (err) {
+      console.log(err);
+    }
   }
   async update(req, res) {
     const { userId, friendsIds } = req;

@@ -28,7 +28,7 @@ class MyFriendList {
       });
 
       const friendsWithOnlineInfo = friends.map(friend => {
-        let online = Boolean(connectedUsers[friend.id]);
+        let online = connectedUsers && Boolean(connectedUsers[friend.id]);
         friend.dataValues.online = online;
         return friend;
       });

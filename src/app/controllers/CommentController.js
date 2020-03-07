@@ -1,3 +1,6 @@
+import { formatDistance, format } from 'date-fns';
+import en from 'date-fns/locale/en-US';
+
 import Comment from '../models/Comment';
 import Post from '../models/Post';
 import User from '../models/User';
@@ -12,7 +15,7 @@ import Cache from '../../lib/Cache';
 class CommentController {
   async store(req, res) {
     const { content } = req.body;
-    const { userId, blocksIds } = req;
+    const { userId, blocksIds, io } = req;
     const { post_id, op_id } = req.params;
 
     if (blocksIds.includes(op_id)) {
@@ -40,8 +43,42 @@ class CommentController {
           as: 'avatar',
           attributes: ['id', 'path', 'url'],
         },
+        {
+          model: File,
+          as: 'cover',
+          attributes: ['id', 'path', 'url'],
+        },
       ],
     });
+
+    comment.dataValues.user = user;
+    comment.dataValues.likes = [];
+    comment.dataValues.timeDistance = formatDistance(
+      comment.dataValues.createdAt,
+      new Date(),
+      {
+        locale: en,
+      }
+    );
+    comment.dataValues.time = format(
+      comment.dataValues.createdAt,
+      "mm'/'dd'/'yy ',' h':'mm a",
+      {
+        locale: en,
+      }
+    );
+    comment.dataValues.liked = false;
+    comment.dataValues.editable = comment.user_id === userId;
+
+    const room = `post:${post_id}`;
+    io.to(room).emit('COMMENT_POST', {
+      params: {
+        person: user,
+        post_id: Number(post_id),
+        comment,
+      },
+    });
+
     if (userId !== post.user_id) {
       await Notification.create({
         context: 'comment_post',
@@ -73,66 +110,89 @@ class CommentController {
     return res.json(comment);
   }
   async index(req, res) {
-    const { blocksIds } = req;
-    const { post_id } = req.params;
+    try {
+      const { userId, blocksIds } = req;
+      const { post_id } = req.params;
 
-    console.log('querying..............');
+      console.log('querying..............');
 
-    const comments = await Comment.findAll({
-      where: {
-        post_id,
-        user_id: {
-          [Op.notIn]: blocksIds,
-        },
-      },
-      order: [['created_at', 'ASC']],
-      limit: 50,
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: ['id', 'name', 'username', 'bio', 'location'],
-          include: [
-            {
-              model: File,
-              as: 'avatar',
-              attributes: ['id', 'path', 'url'],
-            },
-            {
-              model: File,
-              as: 'cover',
-              attributes: ['id', 'url', 'path'],
-            },
-          ],
-        },
-        {
-          model: User,
-          as: 'likes',
-          attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
-          order: [['created_at', 'ASC']],
-          where: {
-            id: {
-              [Op.notIn]: blocksIds,
-            },
+      let comments = await Comment.findAll({
+        where: {
+          post_id,
+          user_id: {
+            [Op.notIn]: blocksIds,
           },
-          required: false,
-          include: [
-            {
-              model: File,
-              as: 'avatar',
-              attributes: ['id', 'url', 'path'],
-            },
-            {
-              model: File,
-              as: 'cover',
-              attributes: ['id', 'url', 'path'],
-            },
-          ],
         },
-      ],
-    });
-    console.log(comments);
-    return res.json(comments);
+        order: [['created_at', 'ASC']],
+        limit: 50,
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name', 'username', 'bio', 'location'],
+            include: [
+              {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
+              },
+              {
+                model: File,
+                as: 'cover',
+                attributes: ['id', 'url', 'path'],
+              },
+            ],
+          },
+          {
+            model: User,
+            as: 'likes',
+            attributes: ['id', 'name', 'username', 'email', 'bio', 'location'],
+            order: [['created_at', 'ASC']],
+            where: {
+              id: {
+                [Op.notIn]: blocksIds,
+              },
+            },
+            required: false,
+            include: [
+              {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'url', 'path'],
+              },
+              {
+                model: File,
+                as: 'cover',
+                attributes: ['id', 'url', 'path'],
+              },
+            ],
+          },
+        ],
+      });
+      comments = comments.map(comment => {
+        comment.dataValues.timeDistance = formatDistance(
+          comment.dataValues.createdAt,
+          new Date(),
+          {
+            locale: en,
+          }
+        );
+        comment.dataValues.time = format(
+          comment.dataValues.createdAt,
+          "mm'/'dd'/'yy ',' h':'mm a",
+          {
+            locale: en,
+          }
+        );
+        comment.dataValues.liked = comment.likes.some(
+          like => like.id === userId
+        );
+        return comment;
+      });
+      return res.json(comments);
+    } catch (err) {
+      console.log(err);
+    }
   }
   async update(req, res) {
     const { userId } = req;

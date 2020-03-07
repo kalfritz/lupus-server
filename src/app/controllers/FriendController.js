@@ -92,7 +92,6 @@ class FriendController {
         return friend;
       });
 
-      console.log({ friends, count });
       return res.json({ friends, count });
     } catch (err) {
       console.log(err);
