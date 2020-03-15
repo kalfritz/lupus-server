@@ -12,7 +12,7 @@ import Cache from '../../lib/Cache';
 class PostLikeController {
   async store(req, res) {
     try {
-      const { userId: user_id, blocksIds, io, socket } = req;
+      const { userId: user_id, blocksIds, io, socket, connectedUsers } = req;
       let { post_id, op_id } = req.params;
 
       post_id = Number(post_id);
@@ -84,7 +84,7 @@ class PostLikeController {
         await post.addLike(user);
 
         if (user_id !== post.user_id) {
-          await Notification.create({
+          const notification = await Notification.create({
             context: 'like_post',
             recepient: post.user_id,
             content: {
@@ -97,6 +97,11 @@ class PostLikeController {
               username: user.username,
               name: user.name ? user.name : null,
               avatar: user.avatar ? user.avatar.url : null,
+            },
+          });
+          io.to(connectedUsers[op_id]).emit('NOTIFICATION', {
+            params: {
+              notification,
             },
           });
         }

@@ -14,7 +14,7 @@ import Cache from '../../lib/Cache';
 class CommentLikeController {
   async store(req, res) {
     try {
-      const { userId: user_id, blocksIds, io, socket } = req;
+      const { userId: user_id, blocksIds, io, connectedUsers } = req;
       const { post_id, op_id, comment_id } = req.params;
 
       if (blocksIds.includes(op_id)) {
@@ -83,7 +83,7 @@ class CommentLikeController {
         await comment.addLike(user);
 
         if (user_id !== comment.user_id) {
-          await Notification.create({
+          const notification = await Notification.create({
             context: 'like_comment',
             recepient: comment.user_id,
             content: {
@@ -100,10 +100,16 @@ class CommentLikeController {
               avatar: user.avatar ? user.avatar.url : null,
             },
           });
+          io.to(connectedUsers[op_id]).emit('NOTIFICATION', {
+            params: {
+              notification,
+            },
+          });
         }
 
         const usersThatHaveThisPostCached = await Cache.get(`post:${post.id}`);
-        usersThatHaveThisPostCached.length > 0 &&
+        usersThatHaveThisPostCached &&
+          usersThatHaveThisPostCached.length > 0 &&
           (await Cache.invalidateManyPosts([
             ...usersThatHaveThisPostCached,
             user_id,

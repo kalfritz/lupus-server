@@ -1,9 +1,53 @@
 import User from '../models/User';
 import File from '../models/File';
+import { Op } from 'sequelize';
 
 import Cache from '../../lib/Cache';
 
 class UserController {
+  async index(req, res) {
+    const { blocksIds = [] } = req.params;
+    const { q = '', page = 1, limit = 8 } = req.query;
+
+    try {
+      console.log('hit');
+      const users = await User.findAll({
+        limit,
+        offset: (page - 1) * limit,
+        where: {
+          [Op.or]: [
+            {
+              username: {
+                [Op.iLike]: `%${q}%`,
+              },
+            },
+            {
+              name: {
+                [Op.iLike]: `%${q}%`,
+              },
+            },
+          ],
+          id: { [Op.notIn]: blocksIds },
+        },
+        include: [
+          {
+            model: File,
+            as: 'avatar',
+            attributes: ['id', 'name', 'path', 'url'],
+          },
+          {
+            model: File,
+            as: 'cover',
+            attributes: ['id', 'path', 'url'],
+          },
+        ],
+      });
+
+      return res.json(users);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   async store(req, res) {
     const { email, username } = req.body;
     try {

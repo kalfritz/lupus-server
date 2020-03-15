@@ -15,7 +15,7 @@ import Cache from '../../lib/Cache';
 class CommentController {
   async store(req, res) {
     const { content } = req.body;
-    const { userId, blocksIds, io } = req;
+    const { userId, blocksIds, io, connectedUsers } = req;
     const { post_id, op_id } = req.params;
 
     if (blocksIds.includes(op_id)) {
@@ -80,7 +80,7 @@ class CommentController {
     });
 
     if (userId !== post.user_id) {
-      await Notification.create({
+      const notification = await Notification.create({
         context: 'comment_post',
         recepient: post.user_id,
         content: {
@@ -94,6 +94,12 @@ class CommentController {
           username: user.username,
           name: user.name ? user.name : null,
           avatar: user.avatar ? user.avatar.url : null,
+        },
+      });
+      console.log(connectedUsers[op_id]);
+      io.to(connectedUsers[op_id]).emit('NOTIFICATION', {
+        params: {
+          notification,
         },
       });
     }

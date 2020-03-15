@@ -28,6 +28,7 @@ import blocksMiddleware from './app/middlewares/blocks';
 const routes = new Router();
 const upload = multer(multerConfig);
 
+routes.get('/users', authMiddleware, blocksMiddleware, UserController.index);
 routes.get('/users/:username', UserController.show);
 routes.post('/users', UserController.store);
 routes.put('/users', authMiddleware, UserController.update);

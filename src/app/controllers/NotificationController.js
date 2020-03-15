@@ -17,6 +17,7 @@ class NotificationController {
       { recepient: user_id },
       { read: true }
     );
+    console.log('hit update all');
     return res.json({
       totalNotifs: response.n,
       changedNotifs: response.nModified,
