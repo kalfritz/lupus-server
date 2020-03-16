@@ -27,7 +27,16 @@ class App {
   }
 
   middlewares() {
-    this.app.use(cors());
+    //this.app.use(cors());
+    this.app.use(function(req, res, next) {
+      console.log(req);
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept'
+      );
+      next();
+    });
     this.app.use(express.json());
     this.app.use(
       '/files',
@@ -100,10 +109,9 @@ class App {
     this.app.use(async (err, req, res, next) => {
       if (process.env.NODE_ENV === 'development') {
         const errors = await new Youch(err, req).toJSON();
-
         return res.status(500).json(errors);
       }
-
+      console.log(err);
       return res.status(500).json({ error: 'Internal server error' });
     });
   }
