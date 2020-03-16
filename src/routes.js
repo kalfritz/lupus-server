@@ -38,7 +38,11 @@ routes.delete('/users', authMiddleware, UserController.delete);
 
 routes.post('/sessions', SessionController.store);
 
-routes.post('/files', upload.single('file'), FileController.store);
+try {
+  routes.post('/files', upload.single('file'), FileController.store);
+} catch (err) {
+  console.log(err);
+}
 
 routes.get('/notifications', authMiddleware, NotificationController.index);
 routes.put('/notifications', authMiddleware, NotificationController.updateAll);
