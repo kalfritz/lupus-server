@@ -28,7 +28,7 @@ import blocksMiddleware from './app/middlewares/blocks';
 const routes = new Router();
 const upload = multer(multerConfig);
 
-routes.get('/', (req, res) => res.send('lupus api'));
+routes.get('/', (req, res) => res.send('Lupus API'));
 
 routes.get('/users', authMiddleware, blocksMiddleware, UserController.index);
 routes.get('/users/:username', UserController.show);
