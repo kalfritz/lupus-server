@@ -51,7 +51,6 @@ class UserController {
   async store(req, res) {
     const { email, username } = req.body;
     try {
-      console.log(req.body);
       const checkUsername = await User.findOne({ where: { username } });
       if (checkUsername) {
         return res.status(400).json({ error: 'Duplicated username' });

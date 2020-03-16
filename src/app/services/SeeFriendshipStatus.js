@@ -3,7 +3,6 @@ import UserRelationship from '../models/UserRelationship';
 
 class SeeFriendshipStatus {
   async run({ user_id, friendsIds }) {
-    console.log(friendsIds);
     const [friendships_first, friendships_second] = await Promise.all([
       UserRelationship.findAll({
         where: {
