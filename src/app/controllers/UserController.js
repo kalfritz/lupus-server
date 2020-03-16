@@ -65,10 +65,10 @@ class UserController {
 
       const user = await User.create(req.body);
 
-      user.avatar_id = 45;
-      user.cover_id = 32;
+      // user.avatar_id = 45;
+      // user.cover_id = 32;
 
-      await user.save();
+      // await user.save();
 
       const { id } = user;
       return res.json({
