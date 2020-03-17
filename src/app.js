@@ -27,16 +27,12 @@ class App {
   }
 
   middlewares() {
-    //this.app.use(cors());
-    this.app.use(function(req, res, next) {
-      console.log(req);
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept'
-      );
-      next();
-    });
+    this.app.use(
+      cors({
+        origin: ['https://luppus.net'],
+        credentials: true,
+      })
+    );
     this.app.use(express.json());
     this.app.use(
       '/files',
