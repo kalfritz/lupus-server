@@ -39,7 +39,7 @@ class App {
     let connectedUsers;
     let socketPassedToReq;
 
-    this.io.origins(['*']);
+    this.io.origins(['https://luppusapi.xyz:443']);
 
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
