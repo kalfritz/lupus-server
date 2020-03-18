@@ -39,6 +39,8 @@ class App {
     let connectedUsers;
     let socketPassedToReq;
 
+    this.io.origins(['https://luppus.net']);
+
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
       connectedUsers = await IoRedis.connectAnUser({ socket, user_id });
