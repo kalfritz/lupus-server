@@ -39,7 +39,11 @@ class App {
     let connectedUsers;
     let socketPassedToReq;
 
-    this.io.origins(['https://luppus.net:443']);
+    this.io.origins([
+      'http://localhost:3000',
+      'https://luppus.net:443',
+      'https://www.luppus.net:443',
+    ]);
 
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
@@ -102,9 +106,10 @@ class App {
     this.app.use(async (err, req, res, next) => {
       if (process.env.NODE_ENV === 'development') {
         const errors = await new Youch(err, req).toJSON();
+        console.log(err);
         return res.status(500).json(errors);
       }
-      console.log(err);
+
       return res.status(500).json({ error: 'Internal server error' });
     });
   }
