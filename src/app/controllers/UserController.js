@@ -2,6 +2,8 @@ import User from '../models/User';
 import File from '../models/File';
 import { Op } from 'sequelize';
 
+import Notification from '../schemas/Notification';
+
 import Cache from '../../lib/Cache';
 
 class UserController {
@@ -64,12 +66,18 @@ class UserController {
 
       const user = await User.create(req.body);
 
-      // user.avatar_id = 45;
-      // user.cover_id = 32;
+      user.avatar_id = 4;
+      user.cover_id = 1;
 
-      // await user.save();
+      await user.save();
 
       const { id } = user;
+
+      await Notification.create({
+        context: 'welcome',
+        recepient: id,
+      });
+
       return res.json({
         user: { id, username, email },
         token: await User.signToken({ id }),
