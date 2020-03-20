@@ -66,8 +66,8 @@ class UserController {
 
       const user = await User.create(req.body);
 
-      user.avatar_id = 4;
-      user.cover_id = 1;
+      user.avatar_id = 14;
+      user.cover_id = 15;
 
       await user.save();
 
@@ -76,6 +76,13 @@ class UserController {
       await Notification.create({
         context: 'welcome',
         recepient: id,
+        dispatcher: {
+          id: 11,
+          username: 'luppus',
+          name: 'Luppus',
+          avatar:
+            'https://luppusapi.xyz/files/c116df1793199c4f665ea478d6b082d3.jpeg',
+        },
       });
 
       return res.json({
