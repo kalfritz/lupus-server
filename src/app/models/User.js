@@ -34,6 +34,10 @@ class User extends Model {
       if (user.password) {
         user.password_hash = await bcrypt.hash(user.password, 8);
       }
+      if (user.username) {
+        user.username = user.username.toLowerCase();
+        user.username = user.username.split(' ').join('');
+      }
     });
 
     return this;

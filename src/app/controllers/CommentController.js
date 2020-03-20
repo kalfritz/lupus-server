@@ -22,6 +22,8 @@ class CommentController {
       throw new Error('Unavailable content');
     }
 
+    if (content === '') throw new Error('Content cannot be blank');
+
     const comment = await Comment.create({
       user_id: userId,
       post_id,

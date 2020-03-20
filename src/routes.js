@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import Brute from 'express-brute';
+import BruteRedis from 'express-brute-redis';
 
 import multer from 'multer';
 import multerConfig from './config/multer';
@@ -28,7 +30,14 @@ import blocksMiddleware from './app/middlewares/blocks';
 const routes = new Router();
 const upload = multer(multerConfig);
 
-routes.get('/', (req, res) => res.send('Lupus API'));
+const bruteStore = new BruteRedis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+});
+
+const bruteForce = new Brute(bruteStore);
+
+routes.get('/', (req, res) => res.send('Luppus API'));
 
 routes.get('/users', authMiddleware, blocksMiddleware, UserController.index);
 routes.get('/users/:username', UserController.show);
@@ -36,7 +45,7 @@ routes.post('/users', UserController.store);
 routes.put('/users', authMiddleware, UserController.update);
 routes.delete('/users', authMiddleware, UserController.delete);
 
-routes.post('/sessions', SessionController.store);
+routes.post('/sessions', bruteForce.prevent, SessionController.store);
 
 try {
   routes.post('/files', upload.single('file'), FileController.store);
