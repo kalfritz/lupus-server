@@ -2,6 +2,8 @@ import User from '../models/User';
 import File from '../models/File';
 import { Op } from 'sequelize';
 
+import MakeFriendsOnSignUp from '../services/MakeFriendsOnSignUp';
+
 import Notification from '../schemas/Notification';
 
 import Cache from '../../lib/Cache';
@@ -73,17 +75,20 @@ class UserController {
 
       const { id } = user;
 
-      await Notification.create({
-        context: 'welcome',
-        recepient: id,
-        dispatcher: {
-          id: 11,
-          username: 'luppus',
-          name: 'Luppus',
-          avatar:
-            'https://luppusapi.xyz/files/c116df1793199c4f665ea478d6b082d3.jpeg',
-        },
-      });
+      await Promise.all([
+        MakeFriendsOnSignUp.run({ user_id: id }),
+        Notification.create({
+          context: 'welcome',
+          recepient: id,
+          dispatcher: {
+            id: 11,
+            username: 'luppus',
+            name: 'Luppus',
+            avatar:
+              'https://luppusapi.xyz/files/c116df1793199c4f665ea478d6b082d3.jpeg',
+          },
+        }),
+      ]);
 
       return res.json({
         user: { id, username, email },

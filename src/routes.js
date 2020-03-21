@@ -45,8 +45,7 @@ routes.post('/users', UserController.store);
 routes.put('/users', authMiddleware, UserController.update);
 routes.delete('/users', authMiddleware, UserController.delete);
 
-//routes.post('/sessions', bruteForce.prevent, SessionController.store);
-routes.post('/sessions', SessionController.store);
+routes.post('/sessions', bruteForce.prevent, SessionController.store);
 
 try {
   routes.post('/files', upload.single('file'), FileController.store);
