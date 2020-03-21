@@ -48,4 +48,4 @@ class MakeFriendsOnSignup {
   }
 }
 
-export default new SeeFriendshipStatus();
+export default new MakeFriendsOnSignup();
