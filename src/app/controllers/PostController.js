@@ -14,7 +14,8 @@ class PostController {
     const { content, picture_id } = req.body;
     const { userId, friendsIds, socket } = req;
 
-    if (content === '') throw new Error('Content cannot be blank');
+    if (content === '' && !picture_id)
+      throw new Error('Content cannot be blank');
 
     const post = await Post.create({
       user_id: userId,
