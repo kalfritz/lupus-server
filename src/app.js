@@ -80,10 +80,7 @@ class App {
         },
       });
 
-      socket.on('like', async data => {});
-
-      socket.on('SIGN_OUT', async ({ query }) => {
-        const { user_id } = query;
+      socket.on('SIGN_OUT', async () => {
         console.log(`${user_id} signed out`);
         await IoRedis.disconnectAnUser({ socket });
 
