@@ -37,6 +37,8 @@ class App {
         origin: [
           `https://www.${process.env.CLIENT_APP_DOMAIN}`,
           `https://${process.env.CLIENT_APP_DOMAIN}`,
+          `https://socihub.net`, // TODO - make it dynamic
+          `https://www.socihub.net`, // TODO - make it dynamic
           'http://localhost:3000',
         ],
       })
