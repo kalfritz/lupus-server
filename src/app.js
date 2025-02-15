@@ -34,7 +34,11 @@ class App {
     this.app.use(helmet());
     this.app.use(
       cors({
-        origin: `https://${process.env.CLIENT_APP_DOMAIN}`,
+        origin: [
+          `https://www.${process.env.CLIENT_APP_DOMAIN}`,
+          `https://${process.env.CLIENT_APP_DOMAIN}`,
+          'http://localhost:3000',
+        ],
       })
     );
     this.app.use(express.json());
