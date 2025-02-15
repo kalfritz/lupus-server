@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3333:3333"
+    env_file:
+      - .env  # This will load environment variables from the .env file
+    depends_on:
+      - db
+      - mongo
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo:5
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_URL}
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:6
+    restart: always
+    ports:
+      - "6379:6379"
