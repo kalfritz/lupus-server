@@ -34,7 +34,7 @@ class App {
     this.app.use(helmet());
     this.app.use(
       cors({
-        origin: 'https://luppus.net',
+        origin: `https://${process.env.CLIENT_APP_URL}`,
       })
     );
     this.app.use(express.json());
@@ -65,8 +65,8 @@ class App {
 
     this.io.origins([
       'http://localhost:3000',
-      'https://luppus.net:443',
-      'https://www.luppus.net:443',
+      `https://${process.env.CLIENT_APP_DOMAIN}:443`,
+      `https://www.${process.env.CLIENT_APP_DOMAIN}:443`,
     ]);
 
     this.io.on('connection', async socket => {

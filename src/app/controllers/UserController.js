@@ -1,6 +1,6 @@
+import { Op } from 'sequelize';
 import User from '../models/User';
 import File from '../models/File';
-import { Op } from 'sequelize';
 
 import MakeFriendsOnSignUp from '../services/MakeFriendsOnSignUp';
 
@@ -52,6 +52,7 @@ class UserController {
       console.log(err);
     }
   }
+
   async store(req, res) {
     const { email, username } = req.body;
     try {
@@ -78,14 +79,13 @@ class UserController {
       await Promise.all([
         MakeFriendsOnSignUp.run({ user_id: id }),
         Notification.create({
-          context: 'welcome',
+          context: 'x',
           recepient: id,
           dispatcher: {
             id: 11,
             username: 'luppus',
             name: 'Luppus',
-            avatar:
-              'https://luppusapi.xyz/files/c116df1793199c4f665ea478d6b082d3.jpeg',
+            avatar: '', // TODO: add avatar URL or change the FE
           },
         }),
       ]);
@@ -98,6 +98,7 @@ class UserController {
       return console.log(err);
     }
   }
+
   async update(req, res) {
     const { userId } = req;
     const { email, oldPassword } = req.body;
@@ -155,6 +156,7 @@ class UserController {
       bio,
     });
   }
+
   async delete(req, res) {
     const { userId } = req;
 
@@ -174,6 +176,7 @@ class UserController {
 
     return res.json(deletedUser);
   }
+
   async show(req, res) {
     const { username } = req.params;
 
@@ -199,9 +202,8 @@ class UserController {
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
-    } else {
-      return res.json(user);
     }
+    return res.json(user);
   }
 }
 
