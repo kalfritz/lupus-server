@@ -79,7 +79,7 @@ class UserController {
       await Promise.all([
         MakeFriendsOnSignUp.run({ user_id: id }),
         Notification.create({
-          context: 'x',
+          context: 'welcome',
           recepient: id,
           dispatcher: {
             id: 11,
