@@ -23,14 +23,9 @@ class App {
     this.server = http.Server(this.app);
     this.io = socketio(this.server, {
       cors: {
-        origin: [
-          'https://socihub.net',
-          'https://www.socihub.net',
-          'http://localhost:3000',
-        ],
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true, // Allow cookies/session-based authentication
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        credentials: true,
       },
     });
 
