@@ -57,12 +57,7 @@ class App {
     let connectedUsers;
     let socketPassedToReq;
 
-    this.io.origins([
-      'http://localhost:3000',
-      `https://${process.env.CLIENT_APP_DOMAIN}:443`,
-      `https://www.${process.env.CLIENT_APP_DOMAIN}:443`,
-      'https://socihub.net',
-    ]);
+    this.io.origins('*:*');
 
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
