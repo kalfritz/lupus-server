@@ -21,7 +21,18 @@ class App {
   constructor() {
     this.app = express();
     this.server = http.Server(this.app);
-    this.io = socketio(this.server);
+    this.io = socketio(this.server, {
+      cors: {
+        origin: [
+          'https://socihub.net',
+          'https://www.socihub.net',
+          'http://localhost:3000',
+        ],
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true, // Allow cookies/session-based authentication
+      },
+    });
 
     this.middlewares();
     this.connections();
@@ -56,8 +67,6 @@ class App {
   connections() {
     let connectedUsers;
     let socketPassedToReq;
-
-    this.io.origins('*:*');
 
     this.io.on('connection', async socket => {
       const { user_id } = socket.handshake.query;
