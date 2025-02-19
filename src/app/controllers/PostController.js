@@ -206,7 +206,7 @@ class PostController {
       const cacheKey = `user:${userId}:posts:${page}`;
       const cached = await Cache.get(cacheKey);
 
-      if (cached && true) {
+      if (cached && false) {
         // Todo - gotta implement cache invalidation for posts on delete and update. for now, lets just not use cache
         console.log('it will return cached');
         cached.map(post => {
