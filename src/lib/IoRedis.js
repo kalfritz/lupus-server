@@ -33,9 +33,9 @@ class IoRedis {
 
   async disconnectAnUser({ socket }) {
     try {
-      //remove user from connected users
+      // remove user from connected users
       const key = 'io:connected_users';
-      let connectedUsers = await this.get(key);
+      const connectedUsers = await this.get(key);
       const userId = Object.keys(connectedUsers).find(
         socket_id => connectedUsers[socket_id] === socket.id
       );

@@ -37,7 +37,9 @@ const bruteStore = new BruteRedis({
 
 const bruteForce = new Brute(bruteStore);
 
-routes.get('/', (req, res) => res.send('Luppus API'));
+routes.get('/', (req, res) =>
+  res.send(`SociHub API ${process.env.DB_HOST}, dbname: ${process.env.DB_NAME}`)
+);
 
 routes.get('/users', authMiddleware, blocksMiddleware, UserController.index);
 routes.get('/users/:username', UserController.show);

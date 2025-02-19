@@ -75,11 +75,13 @@ class User extends Model {
       as: 'user2',
     });
   }
+
   static signToken(payload) {
     return promisify(jwt.sign)(payload, authConfig.secret, {
       expiresIn: authConfig.expiresIn,
     });
   }
+
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }

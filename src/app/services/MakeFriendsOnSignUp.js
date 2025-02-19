@@ -4,41 +4,41 @@ class MakeFriendsOnSignup {
   async run({ user_id }) {
     await Promise.all([
       UserRelationship.create({
-        user_first_id: 1 /* Werewolf */,
-        user_second_id: user_id,
-        status: 'pending_second_first',
-      }),
-      UserRelationship.create({
-        user_first_id: 17 /* Aracanidea */,
+        user_first_id: 150 /* John Wick */,
         user_second_id: user_id,
         status: 'pending_first_second',
       }),
       UserRelationship.create({
-        user_first_id: 11 /* Luppus */,
+        user_first_id: 170 /* Saul Goodman */,
+        user_second_id: user_id,
+        status: 'pending_second_first',
+      }),
+      UserRelationship.create({
+        user_first_id: 110 /* Brendan Eich */,
         user_second_id: user_id,
         status: 'friends',
         friendship_time: new Date(),
       }),
       UserRelationship.create({
-        user_first_id: 18 /* Hannibal */,
+        user_first_id: 120 /* Gabe Newell */,
         user_second_id: user_id,
         status: 'friends',
         friendship_time: new Date(),
       }),
       UserRelationship.create({
-        user_first_id: 19 /* Cicero */,
+        user_first_id: 130 /* Gandalf */,
         user_second_id: user_id,
         status: 'friends',
         friendship_time: new Date(),
       }),
       UserRelationship.create({
-        user_first_id: 20 /* Mikhail Tal */,
+        user_first_id: 140 /* James Hetfield */,
         user_second_id: user_id,
         status: 'friends',
         friendship_time: new Date(),
       }),
       UserRelationship.create({
-        user_first_id: 21 /* Michael Scott */,
+        user_first_id: 160 /* Magnus Carlsen */,
         user_second_id: user_id,
         status: 'friends',
         friendship_time: new Date(),

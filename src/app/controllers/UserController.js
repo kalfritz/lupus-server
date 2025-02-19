@@ -60,20 +60,15 @@ class UserController {
       if (checkUsername) {
         return res.status(400).json({ error: 'Duplicated username' });
       }
-
       const checkEmail = await User.findOne({ where: { email } });
-
       if (checkEmail) {
         return res.status(400).json({ error: 'Duplicated email' });
       }
-
       const user = await User.create(req.body);
 
-      user.avatar_id = 14;
-      user.cover_id = 15;
-
+      user.avatar_id = 11;
+      user.cover_id = 12;
       await user.save();
-
       const { id } = user;
 
       await Promise.all([
@@ -82,10 +77,10 @@ class UserController {
           context: 'welcome',
           recepient: id,
           dispatcher: {
-            id: 11,
-            username: 'luppus',
-            name: 'Luppus',
-            avatar: '', // TODO: add avatar URL or change the FE
+            id: 130,
+            username: 'gandalf',
+            name: 'Gandalf',
+            avatar: `${process.env.APP_URL}/files/gandalf-pfp.jpg`,
           },
         }),
       ]);

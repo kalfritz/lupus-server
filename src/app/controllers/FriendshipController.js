@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import User from '../models/User';
 import File from '../models/File';
 import UserRelationship from '../models/UserRelationship';
@@ -5,13 +6,12 @@ import UserRelationship from '../models/UserRelationship';
 import Cache from '../../lib/Cache';
 
 import Notification from '../schemas/Notification';
-import { Op } from 'sequelize';
 
 class FriendshipController {
   async index(req, res) {
     const { userId: user_id } = req;
 
-    //query all the friendships that the friend id is on user_first_id
+    // query all the friendships that the friend id is on user_first_id
     const friendships = await UserRelationship.findAll({
       where: {
         status: 'friends',
@@ -28,6 +28,7 @@ class FriendshipController {
 
     return res.json(friendships);
   }
+
   async show(req, res) {
     try {
       let { userId } = req;
@@ -37,11 +38,11 @@ class FriendshipController {
       person_id = Number(person_id);
 
       if (userId === person_id) {
-        throw new Error('You cannot be your own friend.');
+        throw new Error('You cannot be your own friend. (lmao)');
       }
       console.log({ userId, person_id });
 
-      let friendship = await UserRelationship.findOne({
+      const friendship = await UserRelationship.findOne({
         where: {
           [Op.or]: [
             {
@@ -83,6 +84,7 @@ class FriendshipController {
       console.log(err);
     }
   }
+
   async store(req, res) {
     try {
       const { userId } = req;
@@ -138,125 +140,124 @@ class FriendshipController {
 
       if (created) {
         return res.json(relationship);
+      }
+      if (user_first_id === userId) {
+        if (relationship.status === 'pending_first_second') {
+          throw new Error('Pending Request');
+        }
+        if (relationship.status === 'pending_second_first') {
+          relationship.status = 'friends';
+          await relationship.save();
+
+          const user = await User.findByPk(userId, {
+            include: [
+              {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
+              },
+            ],
+          });
+
+          await Promise.all([
+            Notification.create({
+              context: 'friendship',
+              recepient: userId,
+              dispatcher: {
+                id: person_id,
+                username: person.username,
+                name: person.name ? person.name : null,
+                avatar: person.avatar ? person.avatar.url : null,
+              },
+            }),
+            Notification.create({
+              context: 'friendship',
+              recepient: person_id,
+              dispatcher: {
+                id: userId,
+                username: user.username,
+                name: user.name ? user.name : null,
+                avatar: user.avatar ? user.avatar.url : null,
+              },
+            }),
+          ]);
+
+          return res.json(relationship);
+        }
+        if (relationship.status === 'friends') {
+          throw new Error('You are already friends');
+        }
+        if (relationship.status === 'block_first_second') {
+          relationship.status = 'friends';
+          await relationship.save();
+          return res.json(relationship);
+        }
+        if (relationship.status === 'block_second_first') {
+          throw new Error('Invalid operation');
+        }
+        if (relationship.status === 'block_both') {
+          relationship.status = 'block_second_first';
+          await relationship.save();
+          return res.json(relationship);
+        }
       } else {
-        if (user_first_id === userId) {
-          if (relationship.status === 'pending_first_second') {
-            throw new Error('Pending Request');
-          }
-          if (relationship.status === 'pending_second_first') {
-            relationship.status = 'friends';
-            await relationship.save();
+        if (relationship.status === 'pending_first_second') {
+          relationship.status = 'friends';
+          await relationship.save();
 
-            const user = await User.findByPk(userId, {
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'path', 'url'],
-                },
-              ],
-            });
+          const user = await User.findByPk(userId, {
+            include: [
+              {
+                model: File,
+                as: 'avatar',
+                attributes: ['id', 'path', 'url'],
+              },
+            ],
+          });
 
-            await Promise.all([
-              Notification.create({
-                context: 'friendship',
-                recepient: userId,
-                dispatcher: {
-                  id: person_id,
-                  username: person.username,
-                  name: person.name ? person.name : null,
-                  avatar: person.avatar ? person.avatar.url : null,
-                },
-              }),
-              Notification.create({
-                context: 'friendship',
-                recepient: person_id,
-                dispatcher: {
-                  id: userId,
-                  username: user.username,
-                  name: user.name ? user.name : null,
-                  avatar: user.avatar ? user.avatar.url : null,
-                },
-              }),
-            ]);
+          await Promise.all([
+            Notification.create({
+              context: 'friendship',
+              recepient: userId,
+              dispatcher: {
+                id: person_id,
+                username: person.username,
+                name: person.name ? person.name : null,
+                avatar: person.avatar ? person.avatar.url : null,
+              },
+            }),
+            Notification.create({
+              context: 'friendship',
+              recepient: person_id,
+              dispatcher: {
+                id: userId,
+                username: user.username,
+                name: user.name ? user.name : null,
+                avatar: user.avatar ? user.avatar.url : null,
+              },
+            }),
+          ]);
 
-            return res.json(relationship);
-          }
-          if (relationship.status === 'friends') {
-            throw new Error('You are already friends');
-          }
-          if (relationship.status === 'block_first_second') {
-            relationship.status = 'friends';
-            await relationship.save();
-            return res.json(relationship);
-          }
-          if (relationship.status === 'block_second_first') {
-            throw new Error('Invalid operation');
-          }
-          if (relationship.status === 'block_both') {
-            relationship.status = 'block_second_first';
-            await relationship.save();
-            return res.json(relationship);
-          }
-        } else {
-          if (relationship.status === 'pending_first_second') {
-            relationship.status = 'friends';
-            await relationship.save();
-
-            const user = await User.findByPk(userId, {
-              include: [
-                {
-                  model: File,
-                  as: 'avatar',
-                  attributes: ['id', 'path', 'url'],
-                },
-              ],
-            });
-
-            await Promise.all([
-              Notification.create({
-                context: 'friendship',
-                recepient: userId,
-                dispatcher: {
-                  id: person_id,
-                  username: person.username,
-                  name: person.name ? person.name : null,
-                  avatar: person.avatar ? person.avatar.url : null,
-                },
-              }),
-              Notification.create({
-                context: 'friendship',
-                recepient: person_id,
-                dispatcher: {
-                  id: userId,
-                  username: user.username,
-                  name: user.name ? user.name : null,
-                  avatar: user.avatar ? user.avatar.url : null,
-                },
-              }),
-            ]);
-
-            return res.json(relationship);
-          }
-          if (relationship.status === 'pending_second_first') {
-            throw new Error('Pending Request');
-          }
-          if (relationship.status === 'friends') {
-            throw new Error('You are already friends');
-          }
-          if (relationship.status === 'block_first_second') {
-            throw new Error('Invalid operation');
-          }
-          if (relationship.status === 'block_second_first') {
-            relationship.status = 'friends';
-            await relationship.save();
-            return res.json(relationship);
-          }
-          if (relationship.status === 'block_both') {
-            relationship.status = 'block_first_second';
-            await relationship.save();
-            return res.json(relationship);
-          }
+          return res.json(relationship);
+        }
+        if (relationship.status === 'pending_second_first') {
+          throw new Error('Pending Request');
+        }
+        if (relationship.status === 'friends') {
+          throw new Error('You are already friends');
+        }
+        if (relationship.status === 'block_first_second') {
+          throw new Error('Invalid operation');
+        }
+        if (relationship.status === 'block_second_first') {
+          relationship.status = 'friends';
+          await relationship.save();
+          return res.json(relationship);
+        }
+        if (relationship.status === 'block_both') {
+          relationship.status = 'block_first_second';
+          await relationship.save();
+          return res.json(relationship);
         }
       }
     } catch (err) {
@@ -270,7 +271,7 @@ class FriendshipController {
 
     let user_first_id = 0;
     let user_second_id = 0;
-    let defaultStatus = '';
+    const defaultStatus = '';
 
     if (userId < person_id) {
       user_first_id = Number(userId);

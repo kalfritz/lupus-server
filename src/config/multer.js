@@ -1,6 +1,7 @@
 import multer from 'multer';
 import crypto from 'crypto';
 import { resolve, extname } from 'path';
+
 module.exports = {
   storage: multer.diskStorage({
     destination: resolve(__dirname, `..`, `..`, `tmp`, `uploads`),
@@ -13,7 +14,7 @@ module.exports = {
   }),
 };
 
-/*attributes: {
+/* attributes: {
   include: [
     [
       sequelize.fn('COUNT', sequelize.col('comments.id')),
@@ -21,4 +22,4 @@ module.exports = {
     ],
   ],
 },
-group: [sequelize.col('Post.id')],*/
+group: [sequelize.col('Post.id')], */

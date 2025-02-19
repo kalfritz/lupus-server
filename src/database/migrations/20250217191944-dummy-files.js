@@ -1,0 +1,145 @@
+module.exports = {
+  up: queryInterface => {
+    return queryInterface.bulkInsert(
+      'files',
+      [
+        {
+          id: 11,
+          name: 'default-pfp',
+          path: 'default-pfp.jpeg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 12,
+          name: 'default-cover',
+          path: 'default-cover.jpeg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 111,
+          name: 'brendan-eich-pfp',
+          path: 'brendan-eich-pfp.jpeg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 112,
+          name: 'brendan-eich-cover',
+          path: 'brendan-eich-cover.jpeg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 121,
+          name: 'gabe-newell-pfp',
+          path: 'gabe-newell-pfp.webp',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 122,
+          name: 'gabe-newell-cover',
+          path: 'gabe-newell-cover.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 131,
+          name: 'gandalf-pfp',
+          path: 'gandalf-pfp.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 132,
+          name: 'gandalf-cover',
+          path: 'gandalf-cover.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 141,
+          name: 'james-hetfield-pfp',
+          path: 'james-hetfield-pfp.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 142,
+          name: 'james-hetfield-cover',
+          path: 'james-hetfield-cover.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 151,
+          name: 'john-wick-pfp',
+          path: 'john-wick-pfp.webp',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 152,
+          name: 'john-wick-cover',
+          path: 'john-wick-cover.png',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 161,
+          name: 'magnus-carlsen-pfp',
+          path: 'magnus-carlsen-pfp.webp',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 162,
+          name: 'magnus-carlsen-cover',
+          path: 'magnus-carlsen-cover.webp',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 171,
+          name: 'saul-goodman-pfp',
+          path: 'saul-goodman-pfp.webp',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          id: 172,
+          name: 'saul-goodman-cover',
+          path: 'saul-goodman-cover.jpg',
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ],
+      {}
+    );
+  },
+
+  down: queryInterface => {
+    return queryInterface.bulkDelete('files', {
+      id: [
+        11,
+        12,
+        111,
+        112,
+        121,
+        122,
+        131,
+        132,
+        141,
+        142,
+        151,
+        152,
+        161,
+        162,
+        171,
+        172,
+      ],
+    });
+  },
+};

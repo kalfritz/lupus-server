@@ -1,12 +1,9 @@
 # Use the node:18-alpine image
 FROM node:18-alpine
 
-# Install build dependencies (Python, make, g++)
-RUN apk add --no-cache python3 make g++ libc-dev && \
+# Install build dependencies (Python, make, g++) and yarn
+RUN apk add --no-cache python3 make g++ libc-dev yarn && \
     rm -rf /var/cache/apk/*
-
-# Install yarn
-RUN apk add --no-cache yarn
 
 # Set working directory
 WORKDIR /app
@@ -20,10 +17,10 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the application code (including the src folder)
 COPY . .
 
-RUN yarn list
-
 # Build the application
 RUN yarn build
+
+RUN yarn sequelize db:migrate
 
 # Expose port 3333
 EXPOSE 3333
