@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import redis from 'redis';
 import RateLimit from 'express-rate-limit';
 import RateLimitRedis from 'rate-limit-redis';
-import cors from 'cors';
 import Youch from 'youch';
 import express from 'express';
 import { resolve } from 'path';
@@ -32,17 +31,6 @@ class App {
 
   middlewares() {
     this.app.use(helmet());
-    this.app.use(
-      cors({
-        origin: [
-          `https://www.${process.env.CLIENT_APP_DOMAIN}`,
-          `https://${process.env.CLIENT_APP_DOMAIN}`,
-          `https://socihub.net`, // TODO - make it dynamic
-          `https://www.socihub.net`, // TODO - make it dynamic
-          'http://localhost:3000',
-        ],
-      })
-    );
     this.app.use(express.json());
     this.app.use(
       '/files',
