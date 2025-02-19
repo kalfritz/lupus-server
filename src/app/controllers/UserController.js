@@ -80,7 +80,7 @@ class UserController {
             id: 130,
             username: 'gandalf',
             name: 'Gandalf',
-            avatar: `${process.env.APP_URL}/files/gandalf-pfp.jpg`,
+            avatar: `${process.env.APP_URL}files/gandalf-pfp.jpg`,
           },
         }),
       ]);
