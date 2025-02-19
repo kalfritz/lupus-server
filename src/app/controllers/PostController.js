@@ -1,11 +1,11 @@
 import { parseISO, formatDistance, format } from 'date-fns';
 import en from 'date-fns/locale/en-US';
 
+import { Op } from 'sequelize';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
 import File from '../models/File';
 import User from '../models/User';
-import { Op } from 'sequelize';
 import Cache from '../../lib/Cache';
 import IoRedis from '../../lib/IoRedis';
 
@@ -23,7 +23,7 @@ class PostController {
       picture_id,
     });
 
-    await Cache.invalidateManyPosts([...friendsIds, userId]); //remember to remove the userId
+    await Cache.invalidateManyPosts([...friendsIds, userId]); // remember to remove the userId
 
     const newPost = await Post.findOne({
       where: {
@@ -62,8 +62,9 @@ class PostController {
 
     return res.json(newPost);
   }
+
   async show(req, res) {
-    let { blocksIds } = req;
+    const { blocksIds } = req;
     const { post_id } = req.params;
 
     const post = await Post.findOne({
@@ -196,6 +197,7 @@ class PostController {
 
     return res.json(post);
   }
+
   async index(req, res) {
     try {
       const { userId, friendsIds, blocksIds, socket } = req;
@@ -204,7 +206,8 @@ class PostController {
       const cacheKey = `user:${userId}:posts:${page}`;
       const cached = await Cache.get(cacheKey);
 
-      if (cached) {
+      if (cached && true) {
+        // Todo - gotta implement cache invalidation for posts on delete and update. for now, lets just not use cache
         console.log('it will return cached');
         cached.map(post => {
           socket.join(`post:${post.id}`);
@@ -229,7 +232,7 @@ class PostController {
       let posts = await Post.findAll({
         where: {
           user_id: {
-            [Op.in]: [...friendsIds, userId], //Remember to remove the user id later.
+            [Op.in]: [...friendsIds, userId], // Remember to remove the user id later.
             [Op.notIn]: blocksIds,
           },
         },
@@ -330,7 +333,7 @@ class PostController {
           {
             model: User,
             as: 'likes',
-            /*limit: 19,*/
+            /* limit: 19, */
             order: [['created_at', 'DESC']],
             required: false,
             where: {
@@ -391,13 +394,14 @@ class PostController {
         return post;
       });
 
-      await Cache.set(cacheKey, posts); //user cache
+      await Cache.set(cacheKey, posts); // user cache
 
       return res.json(posts);
     } catch (err) {
       console.log(err);
     }
   }
+
   async update(req, res) {
     const { userId, friendsIds } = req;
     const { post_id } = req.params;
@@ -420,6 +424,7 @@ class PostController {
 
     return res.json(updatedPost);
   }
+
   async delete(req, res) {
     const { userId, friendsIds } = req;
     const { post_id } = req.params;
